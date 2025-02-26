@@ -1,0 +1,82 @@
+cmake_minimum_required(VERSION 3.16)
+project(QWaveBox VERSION 1.0 LANGUAGES CXX)
+
+# 设置C++标准
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# 设置自动化处理Qt特性
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
+# 设置CMake模块路径
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# 查找Qt包
+find_package(Qt5 COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets REQUIRED)
+
+# 查找FFmpeg包
+# find_package(FFmpeg REQUIRED)
+
+# 项目源文件
+set(SOURCES
+    src/main.cpp
+    src/mainwindow.cpp
+    src/playlistmanager.cpp
+    src/videoplayer.cpp
+    src/mediacontrolwidget.cpp
+)
+
+# 项目头文件
+set(HEADERS
+    src/mainwindow.h
+    src/playlistmanager.h
+    src/videoplayer.h
+    src/mediacontrolwidget.h
+)
+
+# UI文件
+set(UI_FILES
+    src/mainwindow.ui
+)
+
+# 资源文件
+set(RESOURCES
+    src/resources.qrc
+)
+
+# 添加可执行文件
+add_executable(${PROJECT_NAME}
+    ${SOURCES}
+    ${HEADERS}
+    ${UI_FILES}
+    ${RESOURCES}
+)
+
+# 包含目录
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${FFMPEG_INCLUDE_DIR}
+)
+
+# 链接库
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Multimedia
+    Qt5::MultimediaWidgets
+    ${FFMPEG_LIBRARIES}
+)
+
+# 为Windows设置安装规则
+if(WIN32)
+    install(TARGETS ${PROJECT_NAME} DESTINATION .)
+else()
+    install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+endif()
