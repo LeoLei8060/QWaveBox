@@ -23,10 +23,34 @@ find_package(Qt5 COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets REQUIR
 # 查找FFmpeg包
 # find_package(FFmpeg REQUIRED)
 
+set(GUI_SOURCE_DIR src/gui)
+set(UTILS_SOURCE_DIR src/utils)
+
+set(GUI_SOURCES
+    src/gui/titlebar.cpp
+    src/gui/MainWidget.cpp
+)
+set(GUI_HEADERS
+    src/gui/titlebar.h
+    src/gui/MainWidget.h
+)
+set(GUI_FORMS
+    src/gui/titlebar.ui
+    src/gui/MainWidget.ui
+)
+
+set(UTILS_SOURCES
+    src/utils/fontmanager.cpp
+)
+set(UTILS_HEADERS
+    src/utils/fontmanager.h
+)
+
 # 项目源文件
 set(SOURCES
+    ${GUI_SOURCES}
+    ${UTILS_SOURCES}
     src/main.cpp
-    src/mainwindow.cpp
     src/playlistmanager.cpp
     src/videoplayer.cpp
     src/mediacontrolwidget.cpp
@@ -34,7 +58,8 @@ set(SOURCES
 
 # 项目头文件
 set(HEADERS
-    src/mainwindow.h
+    ${GUI_HEADERS}
+    ${UTILS_HEADERS}
     src/playlistmanager.h
     src/videoplayer.h
     src/mediacontrolwidget.h
@@ -42,7 +67,7 @@ set(HEADERS
 
 # UI文件
 set(UI_FILES
-    src/mainwindow.ui
+    ${GUI_FORMS}
 )
 
 # 资源文件
@@ -56,11 +81,16 @@ add_executable(${PROJECT_NAME}
     ${HEADERS}
     ${UI_FILES}
     ${RESOURCES}
+    src/gui/titlebar.ui
+    src/gui/titlebar.h src/gui/titlebar.cpp src/gui/titlebar.ui
+    src/gui/MainWidget.h src/gui/MainWidget.cpp src/gui/MainWidget.ui
 )
 
 # 包含目录
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${GUI_SOURCE_DIR}
+    ${UTILS_SOURCE_DIR}
     ${FFMPEG_INCLUDE_DIR}
 )
 
