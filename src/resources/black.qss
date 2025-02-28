@@ -1,0 +1,28 @@
+QWidget {
+    background-color: black;
+}
+
+QPushButton {
+    background-color: transparent;
+    color: #777777;
+    border: none;
+}
+
+QPushButton:hover {
+    color: #FAE100;
+}
+
+QToolButton {
+    color: #898989;
+    background-color: transparent;
+    border: none;
+    padding-right: 10px;
+    padding-left: 5px;
+}
+QToolButton::menu-indicator {
+    border: none;
+    background-color: transparent;
+}
+QToolButton:hover {
+    background-color: #272727;
+}
