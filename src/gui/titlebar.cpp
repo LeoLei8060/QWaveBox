@@ -10,6 +10,7 @@ TitleBar::TitleBar(QWidget *parent)
     , ui(new Ui::TitleBar)
 {
     ui->setupUi(this);
+    setCursor(Qt::ArrowCursor);
 
     // initialize iconfont
     m_iconFont = FontManager::instance()->fontAt(FontManager::IconFont);
