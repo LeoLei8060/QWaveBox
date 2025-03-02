@@ -84,6 +84,7 @@ add_executable(${PROJECT_NAME}
     src/gui/titlebar.ui
     src/gui/titlebar.h src/gui/titlebar.cpp src/gui/titlebar.ui
     src/gui/MainWidget.h src/gui/MainWidget.cpp src/gui/MainWidget.ui
+    src/gui/playlistwidget.h src/gui/playlistwidget.cpp src/gui/playlistwidget.ui
 )
 
 # 包含目录
