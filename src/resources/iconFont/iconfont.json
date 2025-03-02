@@ -6,6 +6,55 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "7592575",
+      "name": "24gf-volumeCross",
+      "font_class": "24gf-volumeCross",
+      "unicode": "ea0f",
+      "unicode_decimal": 59919
+    },
+    {
+      "icon_id": "7592581",
+      "name": "24gf-volumeHigh",
+      "font_class": "24gf-volumeHigh",
+      "unicode": "ea11",
+      "unicode_decimal": 59921
+    },
+    {
+      "icon_id": "3504242",
+      "name": "置顶",
+      "font_class": "zhiding",
+      "unicode": "e623",
+      "unicode_decimal": 58915
+    },
+    {
+      "icon_id": "8574486",
+      "name": "上移",
+      "font_class": "shangyi",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "11105057",
+      "name": "下移",
+      "font_class": "xiayi",
+      "unicode": "e647",
+      "unicode_decimal": 58951
+    },
+    {
+      "icon_id": "15446701",
+      "name": "置底",
+      "font_class": "zhiding1",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    },
+    {
+      "icon_id": "7736404",
+      "name": "stop",
+      "font_class": "stop",
+      "unicode": "e91d",
+      "unicode_decimal": 59677
+    },
+    {
       "icon_id": "1111849",
       "name": "列表",
       "font_class": "liebiao",
