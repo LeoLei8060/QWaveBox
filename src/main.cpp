@@ -1,4 +1,4 @@
-#include "fontmanager.h"
+#include "application.h"
 #include "mainWidget.h"
 
 #include <QApplication>
@@ -7,41 +7,16 @@
 #include <QFileInfo>
 #include <QIcon>
 
-bool initializeFonts()
-{
-    if (!FontManager::instance()->addThirdpartyFont(":/resources/iconFont/iconfont.ttf",
-                                                    FontManager::IconFont)) {
-        qWarning() << "Failed to load icon font.";
-        return false;
-    }
-    return true;
-}
-
-bool initializeStyle(QApplication *app)
-{
-    QFile   file("://resources/black.qss");
-    QString stylesheets = "";
-    if (file.open(QFile::ReadOnly)) {
-        stylesheets = QLatin1String(file.readAll());
-        app->setStyleSheet(stylesheets);
-        file.close();
-        return true;
-    }
-    return false;
-}
-
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    Application a(argc, argv, "QWaveBox");
 
-    // 设置应用信息
-    QApplication::setApplicationName("QWaveBox");
-    QApplication::setApplicationVersion("1.0");
-    QApplication::setOrganizationName("QWaveBoxOrg");
+    a.setIconFontPath(":/resources/iconFont/iconfont.ttf");
+    a.setIconPath(":/resources/wavebox.ico");
+    a.setStylePath("://resources/black.qss");
 
-    // 设置应用程序图标
-    QIcon appIcon(":/resources/wavebox.ico");
-    QApplication::setWindowIcon(appIcon);
+    if (!a.initialize())
+        return 0;
 
     // 命令行参数解析
     QCommandLineParser parser;
@@ -50,11 +25,6 @@ int main(int argc, char *argv[])
     parser.addVersionOption();
     parser.addPositionalArgument("file", "The file to open");
     parser.process(a);
-
-    if (!initializeFonts())
-        return 0;
-    if (!initializeStyle(&a))
-        return 0;
 
     MainWidget w;
     w.show();

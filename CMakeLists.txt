@@ -25,18 +25,25 @@ find_package(Qt5 COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets REQUIR
 
 set(GUI_SOURCE_DIR src/gui)
 set(UTILS_SOURCE_DIR src/utils)
+set(CORE_SOURCCE_DIR src/core)
 
 set(GUI_SOURCES
     src/gui/titlebar.cpp
-    src/gui/MainWidget.cpp
+    src/gui/mainwidget.cpp
+    src/gui/videowidget.cpp
+    src/gui/playlistwidget.cpp
 )
 set(GUI_HEADERS
     src/gui/titlebar.h
-    src/gui/MainWidget.h
+    src/gui/mainwidget.h
+    src/gui/videowidget.h
+    src/gui/playlistwidget.h
 )
 set(GUI_FORMS
     src/gui/titlebar.ui
-    src/gui/MainWidget.ui
+    src/gui/mainwidget.ui
+    src/gui/videowidget.ui
+    src/gui/playlistwidget.ui
 )
 
 set(UTILS_SOURCES
@@ -46,10 +53,21 @@ set(UTILS_HEADERS
     src/utils/fontmanager.h
 )
 
+set(CORE_SOURCES
+    src/core/appcontext.cpp
+    src/core/application.cpp
+)
+set(CORE_HEADERS
+    src/core/appcontext.h
+    src/core/constants.h
+    src/core/application.h
+)
+
 # 项目源文件
 set(SOURCES
     ${GUI_SOURCES}
     ${UTILS_SOURCES}
+    ${CORE_SOURCES}
     src/main.cpp
     src/playlistmanager.cpp
     src/videoplayer.cpp
@@ -60,6 +78,7 @@ set(SOURCES
 set(HEADERS
     ${GUI_HEADERS}
     ${UTILS_HEADERS}
+    ${CORE_HEADERS}
     src/playlistmanager.h
     src/videoplayer.h
     src/mediacontrolwidget.h
@@ -81,11 +100,6 @@ add_executable(${PROJECT_NAME}
     ${HEADERS}
     ${UI_FILES}
     ${RESOURCES}
-    src/gui/titlebar.ui
-    src/gui/titlebar.h src/gui/titlebar.cpp src/gui/titlebar.ui
-    src/gui/MainWidget.h src/gui/MainWidget.cpp src/gui/MainWidget.ui
-    src/gui/playlistwidget.h src/gui/playlistwidget.cpp src/gui/playlistwidget.ui
-    src/gui/videowidget.h src/gui/videowidget.cpp src/gui/videowidget.ui
 )
 
 # 包含目录
@@ -93,6 +107,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${GUI_SOURCE_DIR}
     ${UTILS_SOURCE_DIR}
+    ${CORE_SOURCCE_DIR}
     ${FFMPEG_INCLUDE_DIR}
 )
 
