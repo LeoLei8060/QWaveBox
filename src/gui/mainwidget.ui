@@ -44,7 +44,7 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="videoWidget" native="true"/>
+     <widget class="VideoWidget" name="videoWidget" native="true"/>
      <widget class="PlaylistWidget" name="playlistWidget" native="true"/>
     </widget>
    </item>
@@ -61,6 +61,12 @@
    <class>PlaylistWidget</class>
    <extends>QWidget</extends>
    <header>playlistwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VideoWidget</class>
+   <extends>QWidget</extends>
+   <header>videowidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
