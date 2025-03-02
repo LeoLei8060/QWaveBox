@@ -1,11 +1,18 @@
 #include "MainWidget.h"
+#include "titlebar.h"
 #include "ui_mainwidget.h"
-#include <QEvent>
-#include <QScreen>
 #include <QApplication>
-#include <QStyle>
-#include <QMouseEvent>
+#include <QCloseEvent>
 #include <QCursor>
+#include <QDebug>
+#include <QEvent>
+#include <QFileDialog>
+#include <QIcon>
+#include <QMessageBox>
+#include <QMouseEvent>
+#include <QScreen>
+#include <QStyle>
+#include <QWindow>
 
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent)
@@ -15,36 +22,49 @@ MainWidget::MainWidget(QWidget *parent)
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
     setMouseTracking(true);
 
+    // 设置应用程序图标
+    QIcon appIcon(":/resources/wavebox.ico");
+    setWindowIcon(appIcon);
+
     ui->playlistWidget->setCursor(Qt::ArrowCursor);
     ui->videoWidget->setCursor(Qt::ArrowCursor);
-    
-    // Set initial window size and position
+
+    // 初始化菜单和托盘
+    setupMenu();
+    setupTrayIcon();
+
+    // 连接TitleBar信号
+    connectTitleBarSignals();
+
     resize(800, 600);
-    
+
     // Center window on screen
     QScreen *screen = QGuiApplication::primaryScreen();
     if (screen) {
         const QRect availableGeometry = screen->availableGeometry();
-        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(), availableGeometry));
+        setGeometry(
+            QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(), availableGeometry));
     }
 }
 
 MainWidget::~MainWidget()
 {
     delete ui;
+    delete m_menu;
+    delete m_trayMenu;
+    delete m_trayIcon;
 }
 
 void MainWidget::changeEvent(QEvent *event)
 {
     if (event->type() == QEvent::WindowStateChange) {
-        // Track the window state for proper button icon updates
         if (windowState() & Qt::WindowMaximized) {
             m_isMaximized = true;
         } else if (windowState() & Qt::WindowNoState) {
             m_isMaximized = false;
         }
     }
-    
+
     QWidget::changeEvent(event);
 }
 
@@ -54,17 +74,16 @@ void MainWidget::mousePressEvent(QMouseEvent *event)
         QWidget::mousePressEvent(event);
         return;
     }
-    
-    // Store current mouse position
+
     m_dragPos = event->globalPos();
-    
-    // Check if user is trying to resize the window
+
+    // Check 鼠标位置是否在边框上
     const QRect frameGeometry = this->frameGeometry();
-    const int x = event->x();
-    const int y = event->y();
-    const int width = frameGeometry.width();
-    const int height = frameGeometry.height();
-    
+    const int   x = event->x();
+    const int   y = event->y();
+    const int   width = frameGeometry.width();
+    const int   height = frameGeometry.height();
+
     if (x <= m_borderWidth && y <= m_borderWidth) {
         m_dragEdge = MainWidget::EdgeType::TopLeft; // Top-left corner
     } else if (x <= m_borderWidth && y >= height - m_borderWidth) {
@@ -84,11 +103,11 @@ void MainWidget::mousePressEvent(QMouseEvent *event)
     } else {
         m_dragEdge = MainWidget::EdgeType::None; // No edge
     }
-    
+
     if (m_dragEdge != MainWidget::EdgeType::None) {
         m_resizing = true;
     }
-    
+
     QWidget::mousePressEvent(event);
 }
 
@@ -98,21 +117,20 @@ void MainWidget::mouseMoveEvent(QMouseEvent *event)
         QWidget::mouseMoveEvent(event);
         return;
     }
-    
-    // Resize the window if we're in resize mode
+
+    // Resize 状态
     if (m_resizing) {
         const QPoint globalPos = event->globalPos();
-        const QRect frameGeometry = this->frameGeometry();
-        QRect newGeometry = frameGeometry;
-        
+        const QRect  frameGeometry = this->frameGeometry();
+        QRect        newGeometry = frameGeometry;
+
         // Calculate the delta
         const int dx = globalPos.x() - m_dragPos.x();
         const int dy = globalPos.y() - m_dragPos.y();
-        
+
         // Update drag position
         m_dragPos = globalPos;
-        
-        // Apply resize based on which edge is being dragged
+
         switch (m_dragEdge) {
         case MainWidget::EdgeType::Left: // Left edge
             newGeometry.setLeft(newGeometry.left() + dx);
@@ -138,24 +156,24 @@ void MainWidget::mouseMoveEvent(QMouseEvent *event)
         case MainWidget::EdgeType::BottomRight: // Bottom-right corner
             newGeometry.setBottomRight(newGeometry.bottomRight() + QPoint(dx, dy));
             break;
+        case EdgeType::None:
+            break;
         }
-        
-        // Apply the new geometry
+
         setGeometry(newGeometry);
     } else {
-        // Update cursor shape based on mouse position
+        // 更新鼠标样式
         const QRect frameGeometry = this->frameGeometry();
-        const int x = event->x();
-        const int y = event->y();
-        const int width = frameGeometry.width();
-        const int height = frameGeometry.height();
-        
-        // Determine cursor shape based on position
-        if ((x <= m_borderWidth && y <= m_borderWidth) || 
-            (x >= width - m_borderWidth && y >= height - m_borderWidth)) {
+        const int   x = event->x();
+        const int   y = event->y();
+        const int   width = frameGeometry.width();
+        const int   height = frameGeometry.height();
+
+        if ((x <= m_borderWidth && y <= m_borderWidth)
+            || (x >= width - m_borderWidth && y >= height - m_borderWidth)) {
             setCursor(Qt::SizeFDiagCursor);
-        } else if ((x <= m_borderWidth && y >= height - m_borderWidth) || 
-                  (x >= width - m_borderWidth && y <= m_borderWidth)) {
+        } else if ((x <= m_borderWidth && y >= height - m_borderWidth)
+                   || (x >= width - m_borderWidth && y <= m_borderWidth)) {
             setCursor(Qt::SizeBDiagCursor);
         } else if (x <= m_borderWidth || x >= width - m_borderWidth) {
             setCursor(Qt::SizeHorCursor);
@@ -165,7 +183,7 @@ void MainWidget::mouseMoveEvent(QMouseEvent *event)
             setCursor(Qt::ArrowCursor);
         }
     }
-    
+
     QWidget::mouseMoveEvent(event);
 }
 
@@ -173,6 +191,175 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     m_resizing = false;
     m_dragEdge = MainWidget::EdgeType::None;
-    
+
     QWidget::mouseReleaseEvent(event);
+}
+
+void MainWidget::setupMenu()
+{
+    // 创建主菜单
+    m_menu = new QMenu(this);
+
+    // 创建菜单项
+    QAction *openFileAction = new QAction(tr("打开文件(F3)"), this);
+    QAction *openFolderAction = new QAction(tr("打开文件夹(F2)"), this);
+    QAction *closeAction = new QAction(tr("关闭(F4)"), this);
+    QAction *optionsAction = new QAction(tr("选项(F5)"), this);
+    QAction *aboutAction = new QAction(tr("关于(F1)"), this);
+    QAction *quitAction = new QAction(tr("退出(Alt+F4)"), this);
+
+    // 添加菜单项到菜单
+    m_menu->addAction(openFileAction);
+    m_menu->addAction(openFolderAction);
+    m_menu->addAction(closeAction);
+    m_menu->addSeparator();
+    m_menu->addAction(optionsAction);
+    m_menu->addAction(aboutAction);
+    m_menu->addSeparator();
+    m_menu->addAction(quitAction);
+
+    // 连接信号和槽
+    connect(openFileAction, &QAction::triggered, this, &MainWidget::onOpenFile);
+    connect(openFolderAction, &QAction::triggered, this, &MainWidget::onOpenFolder);
+    connect(closeAction, &QAction::triggered, this, &MainWidget::onCloseToTray);
+    connect(optionsAction, &QAction::triggered, this, &MainWidget::onOptions);
+    connect(aboutAction, &QAction::triggered, this, &MainWidget::onAbout);
+    connect(quitAction, &QAction::triggered, this, &MainWidget::onQuitApplication);
+
+    // 将菜单设置到TitleBar的QToolButton
+    if (ui->titlebar) {
+        TitleBar *titleBar = qobject_cast<TitleBar *>(ui->titlebar);
+        if (titleBar) {
+            titleBar->setMenu(m_menu);
+        }
+    }
+}
+
+void MainWidget::setupTrayIcon()
+{
+    // 创建托盘图标
+    m_trayIcon = new QSystemTrayIcon(this);
+
+    // 使用应用程序图标作为托盘图标
+    QIcon trayIcon(":/resources/wavebox.ico");
+    m_trayIcon->setIcon(trayIcon);
+    m_trayIcon->setToolTip(tr("QWaveBox"));
+
+    // 创建托盘菜单
+    m_trayMenu = new QMenu(this);
+
+    // 创建托盘菜单项
+    QAction *showAction = new QAction(tr("显示"), this);
+    QAction *quitAction = new QAction(tr("退出"), this);
+
+    // 添加菜单项到托盘菜单
+    m_trayMenu->addAction(showAction);
+    m_trayMenu->addSeparator();
+    m_trayMenu->addAction(quitAction);
+
+    // 设置托盘菜单
+    m_trayIcon->setContextMenu(m_trayMenu);
+
+    // 连接信号和槽
+    connect(showAction, &QAction::triggered, this, [=]() {
+        show();
+        activateWindow();
+    });
+
+    connect(quitAction, &QAction::triggered, this, &MainWidget::onQuitApplication);
+    connect(m_trayIcon, &QSystemTrayIcon::activated, this, &MainWidget::onTrayIconActivated);
+
+    // 显示托盘图标
+    m_trayIcon->show();
+}
+
+void MainWidget::connectTitleBarSignals()
+{
+    if (ui->titlebar) {
+        TitleBar *titleBar = qobject_cast<TitleBar *>(ui->titlebar);
+        if (titleBar) {
+            // 连接信号和槽
+            connect(titleBar, &TitleBar::openFileRequested, this, &MainWidget::onOpenFile);
+            connect(titleBar, &TitleBar::openFolderRequested, this, &MainWidget::onOpenFolder);
+            connect(titleBar, &TitleBar::closeToTrayRequested, this, &MainWidget::onCloseToTray);
+            connect(titleBar, &TitleBar::optionsRequested, this, &MainWidget::onOptions);
+            connect(titleBar, &TitleBar::aboutRequested, this, &MainWidget::onAbout);
+            connect(titleBar,
+                    &TitleBar::quitApplicationRequested,
+                    this,
+                    &MainWidget::onQuitApplication);
+        }
+    }
+}
+
+void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    if (reason == QSystemTrayIcon::DoubleClick) {
+        show();
+        activateWindow();
+    }
+}
+
+void MainWidget::onOpenFile()
+{
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        tr("打开文件"),
+        QString(),
+        tr("媒体文件 (*.mp3 *.mp4 *.avi *.mkv *.wav *.flac);;所有文件 (*.*)"));
+
+    if (!filePath.isEmpty()) {
+        // TODO: 处理打开文件的逻辑
+        qDebug() << "Opening file:" << filePath;
+    }
+}
+
+void MainWidget::onOpenFolder()
+{
+    QString folderPath = QFileDialog::getExistingDirectory(this,
+                                                           tr("打开文件夹"),
+                                                           QString(),
+                                                           QFileDialog::ShowDirsOnly
+                                                               | QFileDialog::DontResolveSymlinks);
+
+    if (!folderPath.isEmpty()) {
+        // TODO: 处理打开文件夹的逻辑
+        qDebug() << "Opening folder:" << folderPath;
+    }
+}
+
+void MainWidget::onCloseToTray()
+{
+    hide();
+
+    // 如果托盘图标存在，显示通知
+    if (m_trayIcon && QSystemTrayIcon::supportsMessages()) {
+        m_trayIcon->showMessage(tr("QWaveBox"),
+                                tr("应用程序已最小化到系统托盘"),
+                                QSystemTrayIcon::Information,
+                                2000);
+    }
+}
+
+void MainWidget::onOptions()
+{
+    // 显示选项对话框
+    QMessageBox::information(this, tr("选项"), tr("选项功能尚未实现"));
+}
+
+void MainWidget::onAbout()
+{
+    // 显示关于对话框
+    QMessageBox::about(this,
+                       tr("关于 QWaveBox"),
+                       tr("<h3>QWaveBox</h3>"
+                          "<p>版本: 1.0</p>"
+                          "<p>一个基于Qt开发的跨平台媒体播放器</p>"
+                          "<p>Copyright 2025 QWaveBox Team</p>"));
+}
+
+void MainWidget::onQuitApplication()
+{
+    // 退出应用程序
+    QApplication::quit();
 }

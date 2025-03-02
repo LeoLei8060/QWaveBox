@@ -1,6 +1,10 @@
 #ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 
+#include <QAction>
+#include <QMenu>
+#include <QShowEvent>
+#include <QSystemTrayIcon>
 #include <QWidget>
 
 namespace Ui {
@@ -34,13 +38,35 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
+private slots:
+    // 处理TitleBar发出的信号的槽函数
+    void onOpenFile();
+    void onOpenFolder();
+    void onCloseToTray();
+    void onOptions();
+    void onAbout();
+    void onQuitApplication();
+
+    // 托盘图标槽函数
+    void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
+
 private:
     Ui::MainWidget *ui;
-    bool m_isMaximized = false;
-    bool m_resizing = false;
-    QPoint m_dragPos;
-    EdgeType m_dragEdge = EdgeType::None;
-    int m_borderWidth = 1; // Width of the resize area
+    bool            m_isMaximized = false;
+    bool            m_resizing = false;
+    QPoint          m_dragPos;
+    EdgeType        m_dragEdge = EdgeType::None;
+    int             m_borderWidth = 1; // Width of the resize area
+
+    // 菜单和托盘相关
+    QMenu           *m_menu;
+    QSystemTrayIcon *m_trayIcon;
+    QMenu           *m_trayMenu;
+
+    // 初始化函数
+    void connectTitleBarSignals();
+    void setupMenu();
+    void setupTrayIcon();
 };
 
 #endif // MAINWIDGET_H
