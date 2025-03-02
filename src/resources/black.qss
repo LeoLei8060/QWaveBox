@@ -1,3 +1,4 @@
+/***** 通用属性 *****/
 QWidget {
     background-color: black;
 }
@@ -7,10 +8,10 @@ QPushButton {
     color: #777777;
     border: none;
 }
-
 QPushButton:hover {
     color: #FAE100;
 }
+
 
 QToolButton {
     color: #898989;
@@ -25,4 +26,112 @@ QToolButton::menu-indicator {
 }
 QToolButton:hover {
     background-color: #272727;
+}
+
+
+QLabel {
+    border: none;
+    background: transparent;
+    color: #777777;
+}
+
+
+QLineEdit {
+    border: none;
+    border-radius: 2px;
+    background-color: #282828;
+
+}
+
+QMenu {
+    background-color: #444444;
+}
+
+QTabWidget {
+    border: none;
+    background-color: #333333;
+}
+QTabWidget QWidget {
+    border: none;
+    background-color: #3B3B3B;
+}
+QTabWidget::pane {
+    border: none;
+    border-top: 2px solid black;
+    background-color: red;
+}
+
+QTabBar::tab {
+    background: transparent;
+    border-right: 1px solid black;
+    min-width: 80px;
+    height: 30px;
+    color: #777777;
+}
+
+QTabBar::tab:selected {
+    color: white;
+}
+QTabBar::tab:!selected {
+    color: #777777;
+}
+
+/***** 通用滑块 *****/
+QSlider {
+    background: transparent;
+}
+QSlider::groove:horizontal {
+    background: transparent;
+    height: 2px;
+}
+QSlider::sub-page:horizontal {
+    background-color: yellow;
+}
+
+QSlider::add-page:horizontal {
+    background-color: black;
+}
+QSlider::handle:horizontal {
+    background-color: #F0F0F0;
+    width: 8px;
+    border: none;
+    border-radius: 4px;
+    height: 8px;
+    margin-top: -3px;
+    margin-bottom: -3px;
+}
+
+/***** 特殊属性 *****/
+#widget_control {
+    background: transparent;
+}
+#widget_timelabel, #widget_schedule {
+    background-color: #1E1E1E;
+}
+#widget_control QPushButton {
+    background-color: #1E1E1E;
+    border: none;
+    color: #F0F0F0;
+}
+#widget_control QPushButton:hover {
+    background-color: #272727;
+}
+
+#label_currentduration {
+    color: white;
+}
+
+#videoSlider::add-page:horizontal {
+    background-color: #444444;
+}
+
+
+#AddPlaylistBtn {
+    background: transparent;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    margin-top: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
