@@ -32,6 +32,7 @@ bool Application::initializeIcon()
     if (appIcon.isNull())
         return false;
     QApplication::setWindowIcon(appIcon);
+    return true;
 }
 
 bool Application::initializeIconFont()
