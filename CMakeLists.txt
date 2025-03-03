@@ -21,7 +21,16 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(Qt5 COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets REQUIRED)
 
 # 查找FFmpeg包
-# find_package(FFmpeg REQUIRED)
+find_package(FFmpeg REQUIRED)
+if(FFMPEG_FOUND)
+    include_directories(${FFMPEG_INCLUDE_DIRS})
+endif()
+
+# 查找SDL2包
+find_package(SDL2 REQUIRED)
+if(SDL2_image_FOUND)
+    include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
+endif()
 
 set(GUI_SOURCE_DIR src/gui)
 set(UTILS_SOURCE_DIR src/utils)
@@ -32,12 +41,14 @@ set(GUI_SOURCES
     src/gui/mainwidget.cpp
     src/gui/videowidget.cpp
     src/gui/playlistwidget.cpp
+    src/gui/sdlwidget.cpp
 )
 set(GUI_HEADERS
     src/gui/titlebar.h
     src/gui/mainwidget.h
     src/gui/videowidget.h
     src/gui/playlistwidget.h
+    src/gui/sdlwidget.h
 )
 set(GUI_FORMS
     src/gui/titlebar.ui
@@ -108,6 +119,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${GUI_SOURCE_DIR}
     ${UTILS_SOURCE_DIR}
     ${CORE_SOURCCE_DIR}
+    ${SDL2_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIR}
 )
 
@@ -118,6 +130,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt5::Widgets
     Qt5::Multimedia
     Qt5::MultimediaWidgets
+    ${SDL2_LIBRARIES}
     ${FFMPEG_LIBRARIES}
 )
 
