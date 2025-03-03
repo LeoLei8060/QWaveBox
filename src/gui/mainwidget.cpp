@@ -129,8 +129,7 @@ void MainWidget::mouseMoveEvent(QMouseEvent *event)
     // Resize 状态
     if (m_resizing) {
         const QPoint globalPos = event->globalPos();
-        const QRect  frameGeometry = this->frameGeometry();
-        QRect        newGeometry = frameGeometry;
+        QRect        newGeometry = geometry();
 
         // Calculate the delta
         const int dx = globalPos.x() - m_dragPos.x();

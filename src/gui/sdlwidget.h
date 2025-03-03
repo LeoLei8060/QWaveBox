@@ -20,7 +20,7 @@ public:
     bool initializeSDL();
 
     void renderFrame(AVFrame *frame);
-    
+
     // 重置渲染器状态
     void reset();
 
@@ -32,8 +32,8 @@ private:
     SDL_Window   *m_sdlWindow{nullptr};
     SDL_Renderer *m_sdlRenderer{nullptr};
     SDL_Texture  *m_texture{nullptr};
-    int m_textureWidth{0};    // 当前纹理宽度
-    int m_textureHeight{0};   // 当前纹理高度
+    int           m_textureWidth{0};  // 当前纹理宽度
+    int           m_textureHeight{0}; // 当前纹理高度
 };
 
 #endif // SDLWIDGET_H
