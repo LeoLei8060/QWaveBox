@@ -17,6 +17,7 @@ public:
 
 private:
     void setupControls();
+    void setupVideoWidget();
 
 private:
     Ui::VideoWidget *ui;

@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QWidget" name="video" native="true"/>
+    <widget class="SDLWidget" name="video" native="true"/>
    </item>
    <item>
     <widget class="QWidget" name="widget_schedule" native="true">
@@ -317,6 +317,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SDLWidget</class>
+   <extends>QWidget</extends>
+   <header>sdlwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

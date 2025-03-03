@@ -7,7 +7,9 @@ VideoWidget::VideoWidget(QWidget *parent)
     , ui(new Ui::VideoWidget)
 {
     ui->setupUi(this);
+
     setupControls();
+    setupVideoWidget();
 }
 
 VideoWidget::~VideoWidget()
@@ -39,4 +41,9 @@ void VideoWidget::setupControls()
 
     ui->voiceBtn->setFont(font);
     ui->voiceBtn->setText(QChar(0xea11));
+}
+
+void VideoWidget::setupVideoWidget()
+{
+    ui->video->initializeSDL();
 }
