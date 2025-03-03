@@ -1,6 +1,10 @@
 #include "MainWidget.h"
+#include "demuxthread.h"
+#include "renderthread.h"
 #include "titlebar.h"
 #include "ui_mainwidget.h"
+#include "videodecodethread.h"
+
 #include <QApplication>
 #include <QCloseEvent>
 #include <QCursor>
@@ -17,6 +21,7 @@
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::MainWidget)
+    , m_threadManager(nullptr)
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -45,6 +50,9 @@ MainWidget::MainWidget(QWidget *parent)
         setGeometry(
             QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(), availableGeometry));
     }
+
+    // 初始化线程管理器
+    setupThreads();
 }
 
 MainWidget::~MainWidget()
@@ -273,6 +281,30 @@ void MainWidget::setupTrayIcon()
     m_trayIcon->show();
 }
 
+void MainWidget::setupThreads()
+{
+    m_threadManager = std::make_unique<ThreadManager>();
+    if (!m_threadManager->initializeThreads()) {
+        qWarning() << "线程管理器初始化失败...";
+        return;
+    }
+
+    if (!m_threadManager->startAllThreads()) {
+        qWarning() << "线程启动失败...";
+        return;
+    }
+
+    m_threadManager->getRenderThread()->setVideoWidget(ui->videoWidget->getSDLWidget());
+    m_threadManager->getRenderThread()->initializeVideoRenderer();
+    m_threadManager->getRenderThread()->initializeAudioRenderer(0, 0, 0);
+
+    // TODO: 待修改，发送AVFrame的线程应该是renderthread
+    connect(m_threadManager->getVideoDecodeThread(),
+            &VideoDecodeThread::sigSendAVFrame,
+            this,
+            [this](AVFrame *frame) { ui->videoWidget->renderFrame(frame); });
+}
+
 void MainWidget::connectTitleBarSignals()
 {
     if (ui->titlebar) {
@@ -311,6 +343,7 @@ void MainWidget::onOpenFile()
     if (!filePath.isEmpty()) {
         // TODO: 处理打开文件的逻辑
         qDebug() << "Opening file:" << filePath;
+        m_threadManager->openMedia(filePath);
     }
 }
 

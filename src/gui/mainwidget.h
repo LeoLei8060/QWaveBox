@@ -1,6 +1,8 @@
 #ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 
+#include "threadmanager.h"
+
 #include <QAction>
 #include <QMenu>
 #include <QShowEvent>
@@ -51,6 +53,13 @@ private slots:
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
+    // 初始化函数
+    void connectTitleBarSignals();
+    void setupMenu();
+    void setupTrayIcon();
+    void setupThreads();
+
+private:
     Ui::MainWidget *ui;
     bool            m_isMaximized = false;
     bool            m_resizing = false;
@@ -63,10 +72,7 @@ private:
     QSystemTrayIcon *m_trayIcon;
     QMenu           *m_trayMenu;
 
-    // 初始化函数
-    void connectTitleBarSignals();
-    void setupMenu();
-    void setupTrayIcon();
+    std::unique_ptr<ThreadManager> m_threadManager;
 };
 
 #endif // MAINWIDGET_H
