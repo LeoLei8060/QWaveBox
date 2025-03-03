@@ -3,9 +3,15 @@
 
 #include <QWidget>
 
+extern "C" {
+#include <libavformat/avformat.h>
+}
+
 namespace Ui {
 class VideoWidget;
 }
+
+class SDLWidget;
 
 class VideoWidget : public QWidget
 {
@@ -14,6 +20,10 @@ class VideoWidget : public QWidget
 public:
     explicit VideoWidget(QWidget *parent = nullptr);
     ~VideoWidget();
+
+    void renderFrame(AVFrame *frame);
+
+    SDLWidget *getSDLWidget() const;
 
 private:
     void setupControls();

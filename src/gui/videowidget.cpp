@@ -17,6 +17,16 @@ VideoWidget::~VideoWidget()
     delete ui;
 }
 
+void VideoWidget::renderFrame(AVFrame *frame)
+{
+    ui->video->renderFrame(frame);
+}
+
+SDLWidget *VideoWidget::getSDLWidget() const
+{
+    return ui->video;
+}
+
 void VideoWidget::setupControls()
 {
     auto font = FontManager::instance()->fontAt(FontManager::IconFont);
