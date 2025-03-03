@@ -65,7 +65,7 @@ private:
     bool            m_resizing = false;
     QPoint          m_dragPos;
     EdgeType        m_dragEdge = EdgeType::None;
-    int             m_borderWidth = 1; // Width of the resize area
+    int             m_borderWidth = 2; // Width of the resize area
 
     // 菜单和托盘相关
     QMenu           *m_menu;
