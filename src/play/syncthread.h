@@ -57,6 +57,12 @@ public:
     // 重置时钟
     void resetClocks();
 
+    // 设置播放速度
+    void setPlaybackSpeed(double speed);
+
+    // 设置音频采样率
+    void setAudioSampleRate(int sampleRate);
+
 signals:
     // 同步事件
     void syncEvent(int64_t masterClock, double videoDelay, double audioDelay);
@@ -74,7 +80,7 @@ private:
 
 private:
     // 同步模式
-    SyncMode m_syncMode{SYNC_VIDEO};
+    SyncMode m_syncMode{SYNC_AUDIO};
 
     // 各种时钟（毫秒）
     std::atomic<int64_t> m_audioClock{0};    // 音频时钟
@@ -88,6 +94,12 @@ private:
 
     // 同步阈值（毫秒）
     double m_syncThreshold{10.0}; // 同步阈值
+
+    // 播放速度控制
+    double m_playbackSpeed{1.0}; // 播放速度因子，1.0为正常速度
+
+    // 音频属性
+    int m_audioSampleRate{44100}; // 默认采样率
 
     // 同步锁
     QMutex m_mutex;

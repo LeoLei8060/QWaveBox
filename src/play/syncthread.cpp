@@ -11,6 +11,8 @@ SyncThread::SyncThread(QObject *parent)
     , m_videoDelay(0.0)
     , m_audioDelay(0.0)
     , m_syncThreshold(10.0)
+    , m_playbackSpeed(1.0)
+    , m_audioSampleRate(44100)
 {}
 
 SyncThread::~SyncThread()
@@ -93,6 +95,36 @@ void SyncThread::setExternalClock(int64_t pts)
     }
 }
 
+void SyncThread::setPlaybackSpeed(double speed)
+{
+    QMutexLocker locker(&m_mutex);
+
+    if (speed <= 0.0) {
+        qWarning() << "播放速度设置无效，必须大于0，当前值:" << speed;
+        return;
+    }
+
+    if (m_playbackSpeed != speed) {
+        m_playbackSpeed = speed;
+        qInfo() << "播放速度已设置为:" << m_playbackSpeed;
+    }
+}
+
+void SyncThread::setAudioSampleRate(int sampleRate)
+{
+    QMutexLocker locker(&m_mutex);
+
+    if (sampleRate <= 0) {
+        qWarning() << "音频采样率设置无效，必须大于0，当前值:" << sampleRate;
+        return;
+    }
+
+    if (m_audioSampleRate != sampleRate) {
+        m_audioSampleRate = sampleRate;
+        qInfo() << "音频采样率已设置为:" << m_audioSampleRate;
+    }
+}
+
 int64_t SyncThread::getMasterClock() const
 {
     return m_masterClock;
@@ -105,9 +137,13 @@ double SyncThread::calculateVideoDelay(int64_t videoPts)
         return 0.0;
     }
 
-    // 计算与主时钟的差异
+    // 计算与主时钟的差异，考虑播放速度
+    double  speedFactor = (m_playbackSpeed != 0.0) ? (1.0 / m_playbackSpeed) : 1.0;
     int64_t diff = videoPts - m_masterClock;
 
+    // 计算基本帧延迟（毫秒）
+    double basicFrameDelay = 1000.0 / 30.0; // 假设30fps，约33.33ms每帧
+    
     // 如果差异过大，直接跳过
     if (abs(diff) > 1000) { // 如果差异大于1秒
         qWarning() << "视频与主时钟差异过大:" << diff << "ms, 将跳过同步" << videoPts
@@ -116,11 +152,21 @@ double SyncThread::calculateVideoDelay(int64_t videoPts)
     }
 
     // 计算延迟（毫秒），正值表示需要等待，负值表示需要加速
-    m_videoDelay = diff;
+    // 根据播放速度调整延迟时间
+    m_videoDelay = diff * speedFactor;
+    
+    // 添加基本帧延迟以控制播放速度
+    if (m_videoDelay >= 0) {
+        // 如果已经需要等待，则加上基本帧延迟
+        m_videoDelay += (basicFrameDelay / m_playbackSpeed);
+    } else if (m_videoDelay > -basicFrameDelay) {
+        // 如果需要加速但差异不大，则使用较小的延迟
+        m_videoDelay = (basicFrameDelay / m_playbackSpeed) / 2.0;
+    }
 
-    // 如果需要等待的时间小于同步阈值，则不进行调整
+    // 如果需要等待的时间小于同步阈值，则使用最小延迟
     if (fabs(m_videoDelay) < m_syncThreshold) {
-        m_videoDelay = 0.0;
+        m_videoDelay = (basicFrameDelay / m_playbackSpeed) / 2.0;
     }
 
     return m_videoDelay;
@@ -133,21 +179,37 @@ double SyncThread::calculateAudioDelay(int64_t audioPts)
         return 0.0;
     }
 
-    // 计算与主时钟的差异
+    // 计算与主时钟的差异，考虑播放速度
+    double  speedFactor = (m_playbackSpeed != 0.0) ? (1.0 / m_playbackSpeed) : 1.0;
     int64_t diff = audioPts - m_masterClock;
 
+    // 计算基本帧延迟（毫秒）
+    // 使用音频采样率计算更精确的延迟
+    double audioFrameDelay = 1000.0 * 1024.0 / m_audioSampleRate; // 基于音频帧大小和采样率
+    
     // 如果差异过大，直接跳过
     if (abs(diff) > 1000) { // 如果差异大于1秒
-        qWarning() << "音频与主时钟差异过大:" << diff << "ms, 将跳过同步";
+        qWarning() << "音频与主时钟差异过大:" << diff << "ms, 将跳过同步" << audioPts
+                   << m_masterClock;
         return -1.0; // 返回负值表示需要跳过此帧
     }
 
     // 计算延迟（毫秒），正值表示需要等待，负值表示需要加速
-    m_audioDelay = diff;
+    // 根据播放速度调整延迟时间
+    m_audioDelay = diff * speedFactor;
+    
+    // 添加基本帧延迟以控制播放速度
+    if (m_audioDelay >= 0) {
+        // 如果已经需要等待，则加上基本帧延迟
+        m_audioDelay += (audioFrameDelay / m_playbackSpeed);
+    } else if (m_audioDelay > -audioFrameDelay) {
+        // 如果需要加速但差异不大，则使用较小的延迟
+        m_audioDelay = (audioFrameDelay / m_playbackSpeed) / 2.0;
+    }
 
-    // 如果需要等待的时间小于同步阈值，则不进行调整
+    // 如果需要等待的时间小于同步阈值，则使用最小延迟
     if (fabs(m_audioDelay) < m_syncThreshold) {
-        m_audioDelay = 0.0;
+        m_audioDelay = (audioFrameDelay / m_playbackSpeed) / 2.0;
     }
 
     return m_audioDelay;
@@ -181,7 +243,7 @@ void SyncThread::process()
         // 获取主时钟
         int64_t masterClock = getMasterClock();
 
-        // 计算延迟
+        // 计算延迟，考虑播放速度
         double videoDelay = calculateVideoDelay(videoPts);
         double audioDelay = calculateAudioDelay(audioPts);
 
@@ -198,14 +260,11 @@ void SyncThread::process()
 
 void SyncThread::cleanup()
 {
-    resetClocks();
+    m_syncData = nullptr;
 }
 
 void SyncThread::updateMasterClock()
 {
-    QMutexLocker locker(&m_mutex);
-
-    // 根据同步模式选择主时钟
     switch (m_syncMode) {
     case SYNC_AUDIO:
         m_masterClock.store(m_audioClock.load());
