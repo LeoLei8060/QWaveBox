@@ -1,4 +1,5 @@
 #include "MainWidget.h"
+#include "audiodecodethread.h"
 #include "demuxthread.h"
 #include "renderthread.h"
 #include "titlebar.h"
@@ -295,7 +296,10 @@ void MainWidget::setupThreads()
 
     m_threadManager->getRenderThread()->setVideoWidget(ui->videoWidget->getSDLWidget());
     m_threadManager->getRenderThread()->initializeVideoRenderer();
-    m_threadManager->getRenderThread()->initializeAudioRenderer(0, 0, 0);
+    int     sampleRate = m_threadManager->getAudioSampleRate();
+    int     channels = m_threadManager->getAudioDecodeThread()->getChannels();
+    int64_t channelLayout = m_threadManager->getAudioDecodeThread()->getChannelLayout();
+    m_threadManager->getRenderThread()->initializeAudioRenderer(sampleRate, channels, channelLayout);
 
     // TODO: 待修改，发送AVFrame的线程应该是renderthread
     connect(m_threadManager->getVideoDecodeThread(),
