@@ -7,9 +7,12 @@
 #include <SDL.h>
 #include <memory>
 #include <QMutex>
+#include <QQueue>
 
 extern "C" {
 #include <libavutil/frame.h>
+#include <libavutil/samplefmt.h>
+#include <libswresample/swresample.h>
 }
 
 class AVFrameQueue;
@@ -78,6 +81,10 @@ private:
     // 清理资源
     void cleanup();
 
+    // 回调
+    void        audioCallback(Uint8 *stream, int len);
+    static void sdlAudioCallback(void *userdata, Uint8 *stream, int len);
+
 private:
     // 帧队列
     AVFrameQueue *m_videoFrameQueue{nullptr};
@@ -104,6 +111,23 @@ private:
     int               m_syncThreshold{10};
 
     std::shared_ptr<SyncData> m_syncData{nullptr};
+
+    QMutex             m_audioBufMutex;
+    QQueue<QByteArray> m_audioBufferQueue;
+    int                m_audioBufPos = 0;
+
+    // 音频重采样相关
+    SwrContext    *m_swrContext{nullptr};      // 音频重采样上下文
+    AVSampleFormat m_audioOutSampleFmt;        // 输出音频采样格式
+    int            m_audioOutSampleRate{0};    // 输出音频采样率
+    int            m_audioOutChannels{0};      // 输出音频通道数
+    int64_t        m_audioOutChannelLayout{0}; // 输出音频通道布局
+
+    // 上一次音频源格式信息，用于检测格式变化
+    AVSampleFormat m_lastSrcFormat{AV_SAMPLE_FMT_NONE};
+    int            m_lastSrcSampleRate{0};
+    int            m_lastSrcChannels{0};
+    int64_t        m_lastSrcChannelLayout{0};
 };
 
 #endif // RENDERTHREAD_H
