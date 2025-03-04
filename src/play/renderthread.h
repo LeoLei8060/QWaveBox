@@ -54,6 +54,9 @@ public:
     // 获取当前音频时间戳
     int64_t getCurrentAudioPts() const;
 
+public slots:
+    void onSyncEvent(int64_t masterClock, double videoDelay, double audioDelay);
+
 signals:
     // 渲染完成信号
     void renderFinished();
@@ -98,6 +101,7 @@ private:
     // 视频帧计数
     int               m_frameCount{0};
     SDL_AudioDeviceID m_audioDevice;
+    int               m_syncThreshold{10};
 
     std::shared_ptr<SyncData> m_syncData{nullptr};
 };

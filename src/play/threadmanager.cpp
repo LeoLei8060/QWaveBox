@@ -103,6 +103,7 @@ bool ThreadManager::initializeThreads()
         if (renderThd && syncThd) {
             renderThd->setSyncData(m_syncData);
             syncThd->setSyncData(m_syncData);
+            connect(syncThd, &SyncThread::syncEvent, renderThd, &RenderThread::onSyncEvent);
         }
 
         m_initialized = true;

@@ -129,8 +129,68 @@ int64_t RenderThread::getCurrentAudioPts() const
     return m_currentAudioPts;
 }
 
+void RenderThread::onSyncEvent(int64_t masterClock, double videoDelay, double audioDelay)
+{
+    qDebug() << "Sync event: masterClock=" << masterClock << "videoDelay=" << videoDelay
+             << "audioDelay=" << audioDelay;
+}
+
 void RenderThread::process()
 {
+    // 处理视频帧
+    if (m_videoInitialized && m_videoFrameQueue && !m_videoFrameQueue->isEmpty()) {
+        AVFrame *videoFrame = m_videoFrameQueue->dequeueNoWait();
+        if (videoFrame) {
+            // 获取同步信息
+            if (m_syncData) {
+                int64_t masterClock;
+                double  videoDelay, audioDelay;
+                m_syncData->getSyncInfo(masterClock, videoDelay, audioDelay);
+                if (videoDelay > 0) {
+                    // 需要等待
+                    msleep(static_cast<unsigned long>(videoDelay));
+                } else if (videoDelay
+                           < -m_syncThreshold) { // 假设阈值为 SyncThread 的 m_syncThreshold
+                    // 需要跳帧，释放当前帧并返回
+                    av_frame_free(&videoFrame);
+                    return;
+                }
+            }
+
+            // 渲染视频帧
+            if (renderVideoFrame(videoFrame)) {
+                // 渲染成功
+            }
+
+            // 释放帧
+            av_frame_free(&videoFrame);
+        }
+    }
+
+    // 处理音频帧
+    if (m_audioInitialized && m_audioFrameQueue && !m_audioFrameQueue->isEmpty()) {
+        AVFrame *audioFrame = m_audioFrameQueue->dequeueNoWait();
+        if (audioFrame) {
+            // 渲染音频帧（音频为主时钟，不调整）
+            if (renderAudioFrame(audioFrame)) {
+                // 渲染成功
+            }
+
+            // 释放帧
+            av_frame_free(&audioFrame);
+        }
+    }
+
+    // 检查是否都已结束
+    if ((m_videoFrameQueue && m_videoFrameQueue->isFinished() && m_videoFrameQueue->isEmpty())
+        && (m_audioFrameQueue && m_audioFrameQueue->isFinished() && m_audioFrameQueue->isEmpty())) {
+        emit renderFinished();
+        pauseProcess();
+    }
+
+    // 控制渲染速率
+    msleep(5);
+#if 0
     // 首先处理视频帧
     if (m_videoInitialized && m_videoFrameQueue && !m_videoFrameQueue->isEmpty()) {
         AVFrame *videoFrame = m_videoFrameQueue->dequeueNoWait();
@@ -178,6 +238,7 @@ void RenderThread::process()
 
     // 控制渲染速率，避免CPU占用过高
     msleep(5);
+#endif
 }
 
 bool RenderThread::renderVideoFrame(AVFrame *frame)
@@ -192,6 +253,15 @@ bool RenderThread::renderVideoFrame(AVFrame *frame)
         // 渲染帧
         m_videoWidget->renderFrame(frame);
         m_frameCount++;
+
+        // 更新视频时间戳到 SyncData
+        if (frame->pts != AV_NOPTS_VALUE) {
+            m_currentVideoPts = frame->pts;
+            if (m_syncData) {
+                m_syncData->setVideoPts(m_currentVideoPts);
+            }
+            emit frameRendered(m_currentVideoPts);
+        }
 
         // 每100帧输出一次日志
         if (m_frameCount % 100 == 0) {
@@ -213,10 +283,6 @@ bool RenderThread::renderAudioFrame(AVFrame *frame)
 
     QMutexLocker locker(&m_audioMutex);
 
-    if (frame->pts != AV_NOPTS_VALUE) {
-        m_currentAudioPts = frame->pts;
-    }
-
     if (!m_audioInitialized) {
         qWarning() << "音频设备尚未初始化";
         return false;
@@ -226,6 +292,14 @@ bool RenderThread::renderAudioFrame(AVFrame *frame)
     if (ret < 0) {
         qWarning() << "SDL_QueueAudio failed:" << SDL_GetError();
         return false;
+    }
+
+    // 更新音频时间戳到 SyncData
+    if (frame->pts != AV_NOPTS_VALUE) {
+        m_currentAudioPts = frame->pts;
+        if (m_syncData) {
+            m_syncData->setAudioPts(m_currentAudioPts);
+        }
     }
 
     return true;
