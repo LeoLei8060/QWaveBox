@@ -99,10 +99,33 @@ bool ThreadManager::initializeThreads()
         }
 
         m_syncData = std::make_shared<SyncData>();
+
+        // 设置默认的播放速度和音频采样率
+        m_syncData->setPlaybackSpeed(1.0);
+
+        // 从音频解码线程获取实际采样率（如果可用）
+        int sampleRate = 44100; // 默认采样率
+        if (audioThd) {
+            int decoderSampleRate = audioThd->getSampleRate();
+            if (decoderSampleRate > 0) {
+                sampleRate = decoderSampleRate;
+                qInfo() << "从解码器获取音频采样率:" << sampleRate << "Hz";
+            } else {
+                qInfo() << "使用默认音频采样率:" << sampleRate << "Hz";
+            }
+        }
+        m_syncData->setAudioSampleRate(sampleRate);
+
         auto syncThd = getSyncThread();
         if (renderThd && syncThd) {
             renderThd->setSyncData(m_syncData);
             syncThd->setSyncData(m_syncData);
+
+            // 确保各线程使用相同的播放速度和采样率
+            // renderThd->setPlaybackSpeed(1.0);
+            syncThd->setPlaybackSpeed(1.0);
+            syncThd->setAudioSampleRate(sampleRate);
+
             connect(syncThd, &SyncThread::syncEvent, renderThd, &RenderThread::onSyncEvent);
         }
 
@@ -266,3 +289,77 @@ LiveStreamThread *ThreadManager::getLiveStreamThread()
     return static_cast<LiveStreamThread *>(getThread(LIVE_STREAM));
 }
 #endif
+
+void ThreadManager::setPlaybackSpeed(double speed)
+{
+    if (!m_syncData) {
+        qWarning() << "同步数据对象尚未初始化，无法设置播放速度";
+        return;
+    }
+
+    if (speed <= 0.0) {
+        qWarning() << "播放速度设置无效，必须大于0，当前值:" << speed;
+        return;
+    }
+
+    // 设置同步数据中的播放速度
+    m_syncData->setPlaybackSpeed(speed);
+
+    // 更新同步线程的播放速度
+    auto syncThd = getSyncThread();
+    if (syncThd) {
+        syncThd->setPlaybackSpeed(speed);
+    }
+
+    // 更新渲染线程的播放速度
+    // auto renderThd = getRenderThread();
+    // if (renderThd) {
+    //     renderThd->setPlaybackSpeed(speed);
+    // }
+
+    qInfo() << "播放速度已设置为:" << speed;
+}
+
+double ThreadManager::getPlaybackSpeed() const
+{
+    if (!m_syncData) {
+        qWarning() << "同步数据对象尚未初始化，无法获取播放速度";
+        return 1.0; // 默认播放速度
+    }
+
+    return m_syncData->getPlaybackSpeed();
+}
+
+void ThreadManager::setAudioSampleRate(int sampleRate)
+{
+    if (!m_syncData) {
+        qWarning() << "同步数据对象尚未初始化，无法设置音频采样率";
+        return;
+    }
+
+    if (sampleRate <= 0) {
+        qWarning() << "音频采样率设置无效，必须大于0，当前值:" << sampleRate;
+        return;
+    }
+
+    // 设置同步数据中的音频采样率
+    m_syncData->setAudioSampleRate(sampleRate);
+
+    // 更新同步线程的音频采样率
+    auto syncThd = getSyncThread();
+    if (syncThd) {
+        syncThd->setAudioSampleRate(sampleRate);
+    }
+
+    qInfo() << "音频采样率已设置为:" << sampleRate << "Hz";
+}
+
+int ThreadManager::getAudioSampleRate() const
+{
+    if (!m_syncData) {
+        qWarning() << "同步数据对象尚未初始化，无法获取音频采样率";
+        return 44100; // 默认采样率
+    }
+
+    return m_syncData->getAudioSampleRate();
+}

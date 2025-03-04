@@ -71,6 +71,18 @@ public:
     LiveStreamThread *getLiveStreamThread();
 #endif
 
+    // 设置播放速度
+    void setPlaybackSpeed(double speed);
+    
+    // 获取当前播放速度
+    double getPlaybackSpeed() const;
+    
+    // 设置音频采样率
+    void setAudioSampleRate(int sampleRate);
+    
+    // 获取当前音频采样率
+    int getAudioSampleRate() const;
+
 signals:
     // 播放状态变化信号
     void playStateChanged(bool isPlaying);
