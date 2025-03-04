@@ -15,6 +15,8 @@ public:
         , m_masterClock(0)
         , m_videoDelay(0.0)
         , m_audioDelay(0.0)
+        , m_playbackSpeed(1.0)
+        , m_audioSampleRate(44100)
     {}
 
     // 设置视频时间戳
@@ -62,6 +64,68 @@ public:
         videoDelay = m_videoDelay;
         audioDelay = m_audioDelay;
     }
+    
+    // 获取主时钟
+    int64_t getMasterClock() const
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_masterClock;
+    }
+    
+    // 设置主时钟
+    void setMasterClock(int64_t masterClock)
+    {
+        QMutexLocker locker(&m_mutex);
+        m_masterClock = masterClock;
+    }
+
+    // 获取视频延迟
+    double getVideoDelay() const
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_videoDelay;
+    }
+
+    // 获取音频延迟
+    double getAudioDelay() const
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_audioDelay;
+    }
+    
+    // 设置播放速度
+    void setPlaybackSpeed(double speed)
+    {
+        QMutexLocker locker(&m_mutex);
+        if (speed <= 0.0) {
+            return; // 忽略无效速度
+        }
+        m_playbackSpeed = speed;
+    }
+    
+    // 获取播放速度
+    double getPlaybackSpeed() const
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_playbackSpeed;
+    }
+    
+    // 设置音频采样率
+    void setAudioSampleRate(int sampleRate)
+    {
+        QMutexLocker locker(&m_mutex);
+        if (sampleRate <= 0) {
+            return; // 忽略无效采样率
+        }
+        m_audioSampleRate = sampleRate;
+    }
+    
+    // 获取音频采样率
+    int getAudioSampleRate() const
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_audioSampleRate;
+    }
 
 private:
     mutable QMutex m_mutex;
@@ -70,6 +134,8 @@ private:
     int64_t        m_masterClock;
     double         m_videoDelay;
     double         m_audioDelay;
+    double         m_playbackSpeed;  // 播放速度
+    int            m_audioSampleRate; // 音频采样率
 };
 
 #endif // SYNCDATA_H
