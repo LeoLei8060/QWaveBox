@@ -34,7 +34,8 @@ endif()
 
 set(GUI_SOURCE_DIR src/gui)
 set(UTILS_SOURCE_DIR src/utils)
-set(CORE_SOURCCE_DIR src/core)
+set(CORE_SOURCE_DIR src/core)
+set(PLAY_SOURCE_DIR src/play)
 
 set(GUI_SOURCES
     src/gui/titlebar.cpp
@@ -74,15 +75,37 @@ set(CORE_HEADERS
     src/core/application.h
 )
 
+set(PLAY_SOURCES
+    src/play/audiodecodethread.cpp
+    src/play/avframequeue.cpp
+    src/play/avpacketqueue.cpp
+    src/play/demuxthread.cpp
+    src/play/renderthread.cpp
+    src/play/syncthread.cpp
+    src/play/threadbase.cpp
+    src/play/threadmanager.cpp
+    src/play/videodecodethread.cpp
+)
+set(PLAY_HEADERS
+    src/play/audiodecodethread.h
+    src/play/avframequeue.h
+    src/play/avpacketqueue.h
+    src/play/demuxthread.h
+    src/play/renderthread.h
+    src/play/syncthread.h
+    src/play/threadbase.h
+    src/play/threadmanager.h
+    src/play/videodecodethread.h
+    src/play/syncdata.h
+)
+
 # 项目源文件
 set(SOURCES
     ${GUI_SOURCES}
     ${UTILS_SOURCES}
     ${CORE_SOURCES}
+    ${PLAY_SOURCES}
     src/main.cpp
-    src/playlistmanager.cpp
-    src/videoplayer.cpp
-    src/mediacontrolwidget.cpp
 )
 
 # 项目头文件
@@ -90,9 +113,7 @@ set(HEADERS
     ${GUI_HEADERS}
     ${UTILS_HEADERS}
     ${CORE_HEADERS}
-    src/playlistmanager.h
-    src/videoplayer.h
-    src/mediacontrolwidget.h
+    ${PLAY_HEADERS}
 )
 
 # UI文件
@@ -118,8 +139,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${GUI_SOURCE_DIR}
     ${UTILS_SOURCE_DIR}
-    ${CORE_SOURCCE_DIR}
+    ${CORE_SOURCE_DIR}
     ${SDL2_INCLUDE_DIRS}
+    ${PLAY_SOURCE_DIR}
     ${FFMPEG_INCLUDE_DIR}
 )
 
