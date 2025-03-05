@@ -12,6 +12,7 @@ class DemuxThread;
 class VideoDecodeThread;
 class AudioDecodeThread;
 class RenderThread;
+class AudioRenderThread;
 class SyncThread;
 class DanmakuThread;
 class LiveStreamThread;
@@ -27,7 +28,8 @@ public:
         DEMUX,        // 解复用线程
         VIDEO_DECODE, // 视频解码线程
         AUDIO_DECODE, // 音频解码线程
-        RENDER,       // 渲染线程
+        VIDEO_RENDER, // 视频渲染线程
+        AUDIO_RENDER, // 音频渲染线程
 #ifdef ENABLE_LIVE_DANMU
         SYNC,       // 同步线程
         DANMAKU,    // 弹幕处理线程
@@ -65,6 +67,7 @@ public:
     VideoDecodeThread *getVideoDecodeThread();
     AudioDecodeThread *getAudioDecodeThread();
     RenderThread      *getRenderThread();
+    AudioRenderThread *getAudioRenderThread();
     SyncThread        *getSyncThread();
 #ifdef ENABLE_LIVE_DANMU
     DanmakuThread    *getDanmakuThread();
@@ -73,13 +76,13 @@ public:
 
     // 设置播放速度
     void setPlaybackSpeed(double speed);
-    
+
     // 获取当前播放速度
     double getPlaybackSpeed() const;
-    
+
     // 设置音频采样率
     void setAudioSampleRate(int sampleRate);
-    
+
     // 获取当前音频采样率
     int getAudioSampleRate() const;
 

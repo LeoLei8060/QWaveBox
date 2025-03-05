@@ -1,5 +1,6 @@
 #include "threadmanager.h"
 #include "audiodecodethread.h"
+#include "audiorenderthread.h"
 #include "demuxthread.h"
 #include "renderthread.h"
 #include "syncthread.h"
@@ -53,7 +54,8 @@ bool ThreadManager::initializeThreads()
         m_threads[AUDIO_DECODE] = std::make_shared<AudioDecodeThread>();
 
         // 渲染线程
-        m_threads[RENDER] = std::make_shared<RenderThread>();
+        m_threads[VIDEO_RENDER] = std::make_shared<RenderThread>();
+        m_threads[AUDIO_RENDER] = std::make_shared<AudioRenderThread>();
 
         // 同步线程
         m_threads[SYNC] = std::make_shared<SyncThread>();
@@ -92,10 +94,13 @@ bool ThreadManager::initializeThreads()
             audioThd->setPacketQueue(demuxThd->audioPacketQueue());
         }
 
-        auto renderThd = getRenderThread();
-        if (videoThd && audioThd && renderThd) {
-            renderThd->setVideoFrameQueue(videoThd->getFrameQueue());
-            renderThd->setAudioFrameQueue(audioThd->getFrameQueue());
+        auto vRenderThd = getRenderThread();
+        auto aRenderThd = getAudioRenderThread();
+        if (videoThd && vRenderThd) {
+            vRenderThd->setVideoFrameQueue(videoThd->getFrameQueue());
+        }
+        if (audioThd && aRenderThd) {
+            aRenderThd->setAudioFrameQueue(audioThd->getFrameQueue());
         }
 
         m_syncData = std::make_shared<SyncData>();
@@ -117,8 +122,9 @@ bool ThreadManager::initializeThreads()
         m_syncData->setAudioSampleRate(sampleRate);
 
         auto syncThd = getSyncThread();
-        if (renderThd && syncThd) {
-            renderThd->setSyncData(m_syncData);
+        if (vRenderThd && syncThd && aRenderThd) {
+            vRenderThd->setSyncData(m_syncData);
+            aRenderThd->setSyncData(m_syncData);
             syncThd->setSyncData(m_syncData);
 
             // 确保各线程使用相同的播放速度和采样率
@@ -126,7 +132,7 @@ bool ThreadManager::initializeThreads()
             syncThd->setPlaybackSpeed(1.0);
             syncThd->setAudioSampleRate(sampleRate);
 
-            connect(syncThd, &SyncThread::syncEvent, renderThd, &RenderThread::onSyncEvent);
+            // connect(syncThd, &SyncThread::syncEvent, vRenderThd, &RenderThread::onSyncEvent);
         }
 
         m_initialized = true;
@@ -159,7 +165,8 @@ bool ThreadManager::startAllThreads()
     m_threads[SYNC]->startProcess();
 
     // 4. 启动渲染线程
-    m_threads[RENDER]->startProcess();
+    m_threads[VIDEO_RENDER]->startProcess();
+    m_threads[AUDIO_RENDER]->startProcess();
 
 #ifdef ENABLE_LIVE_DANMU
     // 5. 启动弹幕线程（如果需要）
@@ -209,8 +216,10 @@ void ThreadManager::stopAllThreads()
 {
     // 按照相反的顺序停止线程
     // 1. 先停止渲染和弹幕线程
-    if (m_threads.contains(RENDER))
-        m_threads[RENDER]->stopProcess();
+    if (m_threads.contains(VIDEO_RENDER))
+        m_threads[VIDEO_RENDER]->stopProcess();
+    if (m_threads.contains(AUDIO_RENDER))
+        m_threads[AUDIO_RENDER]->stopProcess();
 #ifdef ENABLE_LIVE_DANMU
     if (m_threads.contains(DANMAKU))
         m_threads[DANMAKU]->stopProcess();
@@ -270,7 +279,12 @@ AudioDecodeThread *ThreadManager::getAudioDecodeThread()
 
 RenderThread *ThreadManager::getRenderThread()
 {
-    return static_cast<RenderThread *>(getThread(RENDER));
+    return static_cast<RenderThread *>(getThread(VIDEO_RENDER));
+}
+
+AudioRenderThread *ThreadManager::getAudioRenderThread()
+{
+    return static_cast<AudioRenderThread *>(getThread(AUDIO_RENDER));
 }
 
 SyncThread *ThreadManager::getSyncThread()
