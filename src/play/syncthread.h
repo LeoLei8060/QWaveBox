@@ -49,10 +49,13 @@ public:
     int64_t getMasterClock() const;
 
     // 计算视频延迟
-    double calculateVideoDelay(int64_t videoPts);
+    double                    calculateVideoDelay(int64_t videoPts);
+    std::pair<double, double> calculateDelay(
+        int64_t videoPts, int videoNum, int videoDen, int64_t audioPts, int audioNum, int audioDen);
 
     // 计算音频延迟
     double calculateAudioDelay(int64_t audioPts);
+    // double calculateAudioDelay(int64_t audioPts, int num, int den);
 
     // 重置时钟
     void resetClocks();

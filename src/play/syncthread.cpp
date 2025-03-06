@@ -67,31 +67,31 @@ SyncThread::SyncMode SyncThread::getSyncMode() const
 
 void SyncThread::setAudioClock(int64_t pts)
 {
-    m_audioClock = pts;
+    m_audioClock.store(pts);
 
     // 如果当前同步模式是音频，则更新主时钟
     if (m_syncMode == SYNC_AUDIO) {
-        m_masterClock = pts;
+        m_masterClock.store(pts * 0.02267);
     }
 }
 
 void SyncThread::setVideoClock(int64_t pts)
 {
-    m_videoClock = pts;
+    m_videoClock.store(pts);
 
     // 如果当前同步模式是视频，则更新主时钟
     if (m_syncMode == SYNC_VIDEO) {
-        m_masterClock = pts;
+        m_masterClock.store(pts);
     }
 }
 
 void SyncThread::setExternalClock(int64_t pts)
 {
-    m_externalClock = pts;
+    m_externalClock.store(pts);
 
     // 如果当前同步模式是外部，则更新主时钟
     if (m_syncMode == SYNC_EXTERNAL) {
-        m_masterClock = pts;
+        m_masterClock.store(pts);
     }
 }
 
@@ -127,7 +127,7 @@ void SyncThread::setAudioSampleRate(int sampleRate)
 
 int64_t SyncThread::getMasterClock() const
 {
-    return m_masterClock;
+    return m_masterClock.load(); // 使用load()方法读取原子变量
 }
 
 double SyncThread::calculateVideoDelay(int64_t videoPts)
@@ -139,22 +139,22 @@ double SyncThread::calculateVideoDelay(int64_t videoPts)
 
     // 计算与主时钟的差异，考虑播放速度
     double  speedFactor = (m_playbackSpeed != 0.0) ? (1.0 / m_playbackSpeed) : 1.0;
-    int64_t diff = videoPts - m_masterClock;
+    int64_t diff = videoPts - m_masterClock.load(); // 使用load()方法读取原子变量
 
     // 计算基本帧延迟（毫秒）
     double basicFrameDelay = 1000.0 / 30.0; // 假设30fps，约33.33ms每帧
-    
+
     // 如果差异过大，直接跳过
     if (abs(diff) > 1000) { // 如果差异大于1秒
-        qWarning() << "视频与主时钟差异过大:" << diff << "ms, 将跳过同步" << videoPts
-                   << m_masterClock;
+        // qWarning() << "视频与主时钟差异过大:" << diff << "ms, 将跳过同步" << videoPts
+        //            << m_masterClock.load(); // 使用load()方法读取原子变量
         return -1.0; // 返回负值表示需要跳过此帧
     }
 
     // 计算延迟（毫秒），正值表示需要等待，负值表示需要加速
     // 根据播放速度调整延迟时间
     m_videoDelay = diff * speedFactor;
-    
+
     // 添加基本帧延迟以控制播放速度
     if (m_videoDelay >= 0) {
         // 如果已经需要等待，则加上基本帧延迟
@@ -172,6 +172,33 @@ double SyncThread::calculateVideoDelay(int64_t videoPts)
     return m_videoDelay;
 }
 
+std::pair<double, double> SyncThread::calculateDelay(
+    int64_t videoPts, int videoNum, int videoDen, int64_t audioPts, int audioNum, int audioDen)
+{
+    // NOTE: 返回值为[double, double]，前者是视频延时，后者是音频延时
+    std::pair<double, double> result = {0.0, 0.0};
+    double                    videoBase = videoNum * 1.0 / videoDen;
+    double                    audioBase = audioNum * 1.0 / audioDen;
+    double                    videoTime_ms = videoPts /* * videoBase * 1000*/;
+    double                    audioTime_ms = audioPts * 0.02267 /*audioBase * 1000*/;
+    if (m_syncMode == SYNC_AUDIO) {
+        // m_masterClock.store(audioTime_ms);
+        qDebug() << "master: " << audioTime_ms << audioPts << videoPts;
+        m_syncData->setMasterClock(audioTime_ms);
+        // 计算视频延时
+        // double diff = videoTime_ms - audioTime_ms;
+        // if (videoPts > 0)
+        //     qDebug() << diff << videoPts << videoTime_ms << audioPts << audioTime_ms;
+        // if (diff > 1000)
+        //     result.first = 10;
+        // else if (diff > 200)
+        //     result.first = 1;
+    } else if (m_syncMode == SYNC_VIDEO) {
+        // 音频不用调整
+    }
+    return result;
+}
+
 double SyncThread::calculateAudioDelay(int64_t audioPts)
 {
     // 如果音频是主时钟，则不需要延迟
@@ -181,23 +208,23 @@ double SyncThread::calculateAudioDelay(int64_t audioPts)
 
     // 计算与主时钟的差异，考虑播放速度
     double  speedFactor = (m_playbackSpeed != 0.0) ? (1.0 / m_playbackSpeed) : 1.0;
-    int64_t diff = audioPts - m_masterClock;
+    int64_t diff = audioPts - m_masterClock.load(); // 使用load()方法读取原子变量
 
     // 计算基本帧延迟（毫秒）
     // 使用音频采样率计算更精确的延迟
     double audioFrameDelay = 1000.0 * 1024.0 / m_audioSampleRate; // 基于音频帧大小和采样率
-    
+
     // 如果差异过大，直接跳过
     if (abs(diff) > 1000) { // 如果差异大于1秒
         qWarning() << "音频与主时钟差异过大:" << diff << "ms, 将跳过同步" << audioPts
-                   << m_masterClock;
-        return -1.0; // 返回负值表示需要跳过此帧
+                   << m_masterClock.load(); // 使用load()方法读取原子变量
+        return -1.0;                        // 返回负值表示需要跳过此帧
     }
 
     // 计算延迟（毫秒），正值表示需要等待，负值表示需要加速
     // 根据播放速度调整延迟时间
     m_audioDelay = diff * speedFactor;
-    
+
     // 添加基本帧延迟以控制播放速度
     if (m_audioDelay >= 0) {
         // 如果已经需要等待，则加上基本帧延迟
@@ -215,6 +242,11 @@ double SyncThread::calculateAudioDelay(int64_t audioPts)
     return m_audioDelay;
 }
 
+// double SyncThread::calculateAudioDelay(int64_t audioPts, int num, int den)
+// {
+
+// }
+
 void SyncThread::resetClocks()
 {
     QMutexLocker locker(&m_mutex);
@@ -231,31 +263,52 @@ void SyncThread::resetClocks()
 
 void SyncThread::process()
 {
+    // msleep(1);
+    // return;
     if (m_syncData) {
         // 获取当前时间戳
-        int64_t videoPts = m_syncData->getVideoPts();
-        int64_t audioPts = m_syncData->getAudioPts();
+        auto [videoPts, videoBase_num, videoBase_den] = m_syncData->getVideoData();
+        auto [audioPts, audioBase_num, audioBase_den] = m_syncData->getAudioData();
 
-        // 更新时钟
+        // 更新本地时钟
         setVideoClock(videoPts);
         setAudioClock(audioPts);
+        int64_t tm = audioPts * 0.02267;
+        m_syncData->setMasterClock(tm);
+        // qDebug() << "sync: " << tm << audioPts;
 
-        // 获取主时钟
-        int64_t masterClock = getMasterClock();
+        // 获取主时钟值
+        // int64_t masterClock = getMasterClock();
+
+        // 获取播放速度和音频采样率
+        // double playbackSpeed = m_syncData->getPlaybackSpeed();
+        // int    audioSampleRate = m_syncData->getAudioSampleRate();
+
+        // // 更新内部状态
+        // if (playbackSpeed > 0.0) {
+        //     m_playbackSpeed = playbackSpeed;
+        // }
+        // if (audioSampleRate > 0) {
+        //     m_audioSampleRate = audioSampleRate;
+        // }
 
         // 计算延迟，考虑播放速度
-        double videoDelay = calculateVideoDelay(videoPts);
-        double audioDelay = calculateAudioDelay(audioPts);
+        // auto [videoDelay, audioDelay] = calculateDelay(videoPts,
+        //                                                videoBase_num,
+        //                                                videoBase_den,
+        //                                                audioPts,
+        //                                                audioBase_num,
+        //                                                audioBase_den);
 
         // 更新 SyncData
-        m_syncData->setSyncInfo(masterClock, videoDelay, audioDelay);
+        // m_syncData->setSyncInfo(masterClock, videoDelay, audioDelay);
 
         // 发出同步事件
-        emit syncEvent(masterClock, videoDelay, audioDelay);
+        // emit syncEvent(masterClock, videoDelay, audioDelay);
     }
 
     // 同步处理不需要太频繁，每10ms执行一次即可
-    msleep(10);
+    msleep(1);
 }
 
 void SyncThread::cleanup()
@@ -265,15 +318,18 @@ void SyncThread::cleanup()
 
 void SyncThread::updateMasterClock()
 {
+    QMutexLocker locker(&m_mutex);
+
+    // 根据同步模式选择主时钟
     switch (m_syncMode) {
     case SYNC_AUDIO:
-        m_masterClock.store(m_audioClock.load());
+        m_masterClock.store(m_audioClock.load()); // 使用load()方法读取原子变量
         break;
     case SYNC_VIDEO:
-        m_masterClock.store(m_videoClock.load());
+        m_masterClock.store(m_videoClock.load()); // 使用load()方法读取原子变量
         break;
     case SYNC_EXTERNAL:
-        m_masterClock.store(m_externalClock.load());
+        m_masterClock.store(m_externalClock.load()); // 使用load()方法读取原子变量
         break;
     }
 }

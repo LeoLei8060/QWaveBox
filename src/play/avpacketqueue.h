@@ -16,7 +16,7 @@ extern "C" {
 class AVPacketQueue
 {
 public:
-    explicit AVPacketQueue(int maxSize = 100);
+    explicit AVPacketQueue(int maxSize = 10000);
     ~AVPacketQueue();
 
     // 清空队列

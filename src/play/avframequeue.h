@@ -16,7 +16,7 @@ extern "C" {
 class AVFrameQueue
 {
 public:
-    explicit AVFrameQueue(int maxSize = 30);
+    explicit AVFrameQueue(int maxSize = 3000);
     ~AVFrameQueue();
 
     // 清空队列

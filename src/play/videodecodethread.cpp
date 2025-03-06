@@ -13,7 +13,7 @@ VideoDecodeThread::VideoDecodeThread(QObject *parent)
     : ThreadBase(parent)
     , m_codecContext(nullptr)
     , m_packetQueue(nullptr)
-    , m_frameQueue(new AVFrameQueue(30))
+    , m_frameQueue(new AVFrameQueue(1000))
     , m_streamIndex(-1)
 {}
 

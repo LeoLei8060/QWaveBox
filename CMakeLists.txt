@@ -132,6 +132,7 @@ add_executable(${PROJECT_NAME}
     ${HEADERS}
     ${UI_FILES}
     ${RESOURCES}
+    src/play/audiorenderthread.h src/play/audiorenderthread.cpp
 )
 
 # 包含目录

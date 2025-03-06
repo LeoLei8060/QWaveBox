@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QShowEvent>
 #include <QSystemTrayIcon>
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -73,6 +74,9 @@ private:
     QMenu           *m_trayMenu;
 
     std::unique_ptr<ThreadManager> m_threadManager;
+
+    QTimer  m_timer;
+    int64_t m_testTime{0};
 };
 
 #endif // MAINWIDGET_H

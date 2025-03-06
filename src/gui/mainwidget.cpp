@@ -1,5 +1,6 @@
 #include "MainWidget.h"
 #include "audiodecodethread.h"
+#include "audiorenderthread.h"
 #include "demuxthread.h"
 #include "renderthread.h"
 #include "titlebar.h"
@@ -53,7 +54,7 @@ MainWidget::MainWidget(QWidget *parent)
     }
 
     // 初始化线程管理器
-    setupThreads();
+    // setupThreads();
 }
 
 MainWidget::~MainWidget()
@@ -299,7 +300,9 @@ void MainWidget::setupThreads()
     int     sampleRate = m_threadManager->getAudioSampleRate();
     int     channels = m_threadManager->getAudioDecodeThread()->getChannels();
     int64_t channelLayout = m_threadManager->getAudioDecodeThread()->getChannelLayout();
-    m_threadManager->getRenderThread()->initializeAudioRenderer(sampleRate, channels, channelLayout);
+    m_threadManager->getAudioRenderThread()->initializeAudioRenderer(sampleRate,
+                                                                     channels,
+                                                                     channelLayout);
 
     // TODO: 待修改，发送AVFrame的线程应该是renderthread
     connect(m_threadManager->getVideoDecodeThread(),
@@ -346,7 +349,14 @@ void MainWidget::onOpenFile()
     if (!filePath.isEmpty()) {
         // TODO: 处理打开文件的逻辑
         qDebug() << "Opening file:" << filePath;
+        setupThreads();
         m_threadManager->openMedia(filePath);
+        // m_timer.setInterval(1000);
+        // connect(&m_timer, &QTimer::timeout, this, [this]() {
+        //     m_testTime += 1000;
+        //     qDebug() << "定时器" << m_testTime;
+        // });
+        // m_timer.start();
     }
 }
 
