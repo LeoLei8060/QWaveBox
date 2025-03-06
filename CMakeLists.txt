@@ -85,6 +85,7 @@ set(PLAY_SOURCES
     src/play/threadbase.cpp
     src/play/threadmanager.cpp
     src/play/videodecodethread.cpp
+    src/play/audiorenderthread.cpp
 )
 set(PLAY_HEADERS
     src/play/audiodecodethread.h
@@ -96,7 +97,9 @@ set(PLAY_HEADERS
     src/play/threadbase.h
     src/play/threadmanager.h
     src/play/videodecodethread.h
+    src/play/audiorenderthread.h
     src/play/syncdata.h
+    src/play/avsync.h
 )
 
 # 项目源文件
@@ -132,7 +135,6 @@ add_executable(${PROJECT_NAME}
     ${HEADERS}
     ${UI_FILES}
     ${RESOURCES}
-    src/play/audiorenderthread.h src/play/audiorenderthread.cpp
 )
 
 # 包含目录
