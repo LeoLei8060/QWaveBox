@@ -31,6 +31,10 @@ public:
     // 获取一个帧，如果队列为空会阻塞等待
     AVFrame *dequeue(int timeoutMs = -1);
 
+    AVFrame *front();
+
+    AVFrame *pop();
+
     // 获取队列当前大小
     int size() const;
 
