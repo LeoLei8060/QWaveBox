@@ -8,6 +8,7 @@
 #include <queue>
 
 extern "C" {
+#include <SDL.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 }
@@ -44,6 +45,10 @@ public:
 
     // 获取音频编解码参数
     AVCodecParameters *audioCodecParameters() const;
+
+    // 获取时间基数
+    AVRational videoTimebase() const;
+    AVRational audioTimebase() const;
 
     // 获取媒体总时长（毫秒）
     int64_t getDuration() const;

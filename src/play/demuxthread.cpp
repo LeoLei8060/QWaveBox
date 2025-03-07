@@ -4,8 +4,6 @@
 #include <QDebug>
 
 extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
 #include <libavutil/time.h>
 }
 
@@ -177,6 +175,22 @@ AVCodecParameters *DemuxThread::videoCodecParameters() const
 AVCodecParameters *DemuxThread::audioCodecParameters() const
 {
     return m_audioCodecParam;
+}
+
+AVRational DemuxThread::videoTimebase() const
+{
+    if (m_videoStreamIndex != -1)
+        return m_formatContext->streams[m_videoStreamIndex]->time_base;
+    else
+        return AVRational{0, 0};
+}
+
+AVRational DemuxThread::audioTimebase() const
+{
+    if (m_audioStreamIndex != -1)
+        return m_formatContext->streams[m_audioStreamIndex]->time_base;
+    else
+        return AVRational{0, 0};
 }
 
 int64_t DemuxThread::getDuration() const
