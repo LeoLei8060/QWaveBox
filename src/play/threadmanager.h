@@ -83,6 +83,8 @@ public:
 
     double getCurrentPlayProgress();
 
+    void setVolume(int volume);
+
 signals:
     // 播放状态变化信号
     void playStateChanged(bool isPlaying);

@@ -27,9 +27,13 @@ public:
 
     void updateProgress(double val);
 
+signals:
+    void sigVolumeChanged(int volume);
+
 private:
     void setupControls();
     void setupVideoWidget();
+    void initConnect();
 
 private:
     Ui::VideoWidget *ui;

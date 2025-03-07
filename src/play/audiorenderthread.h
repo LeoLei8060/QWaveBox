@@ -49,6 +49,8 @@ public:
     // 关闭渲染器
     void closeRenderer();
 
+    void setVolume(int volume);
+
 protected:
     // 线程处理函数
     void process() override;
@@ -74,6 +76,8 @@ private:
     AVCodecParameters *m_codecpar = nullptr;
     AudioParams        m_inParams;
     AudioParams        m_outParams;
+
+    double m_volume = 1.0;
 };
 
 #endif // AUDIORENDERTHREAD_H

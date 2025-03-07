@@ -56,6 +56,7 @@ private slots:
 private:
     // 初始化函数
     void connectTitleBarSignals();
+    void setupVideoWidget();
     void setupMenu();
     void setupTrayIcon();
     void setupThreads();

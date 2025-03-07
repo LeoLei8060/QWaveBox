@@ -296,3 +296,10 @@ double ThreadManager::getCurrentPlayProgress()
     double  progress = m_avSync.getClock() * 1000 / duration;
     return progress;
 }
+
+void ThreadManager::setVolume(int volume)
+{
+    auto audioThd = getAudioRenderThread();
+    if (audioThd)
+        audioThd->setVolume(volume);
+}

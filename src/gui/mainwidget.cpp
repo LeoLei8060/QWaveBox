@@ -36,6 +36,7 @@ MainWidget::MainWidget(QWidget *parent)
     ui->playlistWidget->setCursor(Qt::ArrowCursor);
     ui->videoWidget->setCursor(Qt::ArrowCursor);
 
+    setupVideoWidget();
     // 初始化菜单和托盘
     setupMenu();
     setupTrayIcon();
@@ -318,6 +319,13 @@ void MainWidget::connectTitleBarSignals()
                     &MainWidget::onQuitApplication);
         }
     }
+}
+
+void MainWidget::setupVideoWidget()
+{
+    connect(ui->videoWidget, &VideoWidget::sigVolumeChanged, this, [this](int volume) {
+        m_threadManager->setVolume(volume);
+    });
 }
 
 void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)

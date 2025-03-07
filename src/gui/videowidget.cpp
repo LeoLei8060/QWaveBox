@@ -11,6 +11,7 @@ VideoWidget::VideoWidget(QWidget *parent)
 
     setupControls();
     setupVideoWidget();
+    initConnect();
 }
 
 VideoWidget::~VideoWidget()
@@ -65,4 +66,9 @@ void VideoWidget::setupControls()
 void VideoWidget::setupVideoWidget()
 {
     ui->video->initializeSDL();
+}
+
+void VideoWidget::initConnect()
+{
+    connect(ui->voiceSlider, &QSlider::valueChanged, this, &VideoWidget::sigVolumeChanged);
 }

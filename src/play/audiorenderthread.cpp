@@ -126,6 +126,12 @@ void AudioRenderThread::closeRenderer()
     qDebug() << "渲染器资源释放完毕";
 }
 
+void AudioRenderThread::setVolume(int volume)
+{
+    double val = volume / 100.0;
+    m_volume = val;
+}
+
 void AudioRenderThread::process()
 {
     // 采用回调函数的方式播放，不需要线程处理业务
@@ -250,6 +256,15 @@ void AudioRenderThread::sdlAudioCallback(void *userdata, Uint8 *stream, int len)
     if (self) {
         // 调用实例方法处理音频回调
         self->audioCallback(stream, len);
+
+        if (self->m_volume != 1.0f) { // 避免不必要的计算
+            Sint16 *samples = reinterpret_cast<Sint16 *>(stream);
+            int     numSamples = len / sizeof(Sint16);
+            for (int i = 0; i < numSamples; ++i) {
+                samples[i] = static_cast<Sint16>(samples[i] * self->m_volume);
+            }
+        }
+
     } else {
         // 如果实例无效，填充静音
         memset(stream, 0, len);
