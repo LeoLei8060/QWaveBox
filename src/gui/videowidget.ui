@@ -64,6 +64,9 @@
       </property>
       <item>
        <widget class="QSlider" name="videoSlider">
+        <property name="maximum">
+         <number>99999</number>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>

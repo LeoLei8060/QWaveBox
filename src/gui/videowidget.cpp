@@ -1,6 +1,7 @@
 #include "videowidget.h"
 #include "fontmanager.h"
 #include "ui_videowidget.h"
+#include <QDebug>
 
 VideoWidget::VideoWidget(QWidget *parent)
     : QWidget(parent)
@@ -25,6 +26,14 @@ void VideoWidget::renderFrame(AVFrame *frame)
 SDLWidget *VideoWidget::getSDLWidget() const
 {
     return ui->video;
+}
+
+void VideoWidget::updateProgress(double val)
+{
+    // 进度条的范围[0, 99999]
+    // val值是百分比，需要乘以100000
+    int iVal = val * 100000;
+    ui->videoSlider->setValue(iVal);
 }
 
 void VideoWidget::setupControls()

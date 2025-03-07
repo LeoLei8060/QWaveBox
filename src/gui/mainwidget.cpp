@@ -351,13 +351,12 @@ void MainWidget::onOpenFile()
             return;
         }
 
-        // setupThreads();
-        // m_timer.setInterval(1000);
-        // connect(&m_timer, &QTimer::timeout, this, [this]() {
-        //     m_testTime += 1000;
-        //     qDebug() << "定时器" << m_testTime;
-        // });
-        // m_timer.start();
+        m_timer.setInterval(500);
+        connect(&m_timer, &QTimer::timeout, this, [this]() {
+            double progress = m_threadManager->getCurrentPlayProgress();
+            ui->videoWidget->updateProgress(progress);
+        });
+        m_timer.start();
     }
 }
 

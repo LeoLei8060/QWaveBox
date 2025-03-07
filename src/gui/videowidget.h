@@ -25,6 +25,8 @@ public:
 
     SDLWidget *getSDLWidget() const;
 
+    void updateProgress(double val);
+
 private:
     void setupControls();
     void setupVideoWidget();
