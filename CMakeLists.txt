@@ -81,7 +81,6 @@ set(PLAY_SOURCES
     src/play/avpacketqueue.cpp
     src/play/demuxthread.cpp
     src/play/renderthread.cpp
-    src/play/syncthread.cpp
     src/play/threadbase.cpp
     src/play/threadmanager.cpp
     src/play/videodecodethread.cpp
@@ -93,12 +92,10 @@ set(PLAY_HEADERS
     src/play/avpacketqueue.h
     src/play/demuxthread.h
     src/play/renderthread.h
-    src/play/syncthread.h
     src/play/threadbase.h
     src/play/threadmanager.h
     src/play/videodecodethread.h
     src/play/audiorenderthread.h
-    src/play/syncdata.h
     src/play/avsync.h
 )
 
