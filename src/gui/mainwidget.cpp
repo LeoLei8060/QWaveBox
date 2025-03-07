@@ -54,7 +54,7 @@ MainWidget::MainWidget(QWidget *parent)
     }
 
     // 初始化线程管理器
-    // setupThreads();
+    setupThreads();
 }
 
 MainWidget::~MainWidget()
@@ -290,25 +290,15 @@ void MainWidget::setupThreads()
         return;
     }
 
-    if (!m_threadManager->startAllThreads()) {
-        qWarning() << "线程启动失败...";
-        return;
-    }
+    // if (!m_threadManager->initThreadLinkage(ui->videoWidget->getSDLWidget())) {
+    //     qWarning() << "线程间关联关系初始化失败...";
+    //     return;
+    // }
 
-    m_threadManager->getRenderThread()->setVideoWidget(ui->videoWidget->getSDLWidget());
-    m_threadManager->getRenderThread()->initializeVideoRenderer();
-    int     sampleRate = m_threadManager->getAudioSampleRate();
-    int     channels = m_threadManager->getAudioDecodeThread()->getChannels();
-    int64_t channelLayout = m_threadManager->getAudioDecodeThread()->getChannelLayout();
-    m_threadManager->getAudioRenderThread()->initializeAudioRenderer(sampleRate,
-                                                                     channels,
-                                                                     channelLayout);
-
-    // TODO: 待修改，发送AVFrame的线程应该是renderthread
-    connect(m_threadManager->getVideoDecodeThread(),
-            &VideoDecodeThread::sigSendAVFrame,
-            this,
-            [this](AVFrame *frame) { ui->videoWidget->renderFrame(frame); });
+    // if (!m_threadManager->startAllThreads()) {
+    //     qWarning() << "线程启动失败...";
+    //     return;
+    // }
 }
 
 void MainWidget::connectTitleBarSignals()
@@ -349,8 +339,19 @@ void MainWidget::onOpenFile()
     if (!filePath.isEmpty()) {
         // TODO: 处理打开文件的逻辑
         qDebug() << "Opening file:" << filePath;
-        setupThreads();
         m_threadManager->openMedia(filePath);
+
+        if (!m_threadManager->initThreadLinkage(ui->videoWidget->getSDLWidget())) {
+            qWarning() << "线程间关联关系初始化失败...";
+            return;
+        }
+
+        if (!m_threadManager->startAllThreads()) {
+            qWarning() << "线程启动失败...";
+            return;
+        }
+
+        // setupThreads();
         // m_timer.setInterval(1000);
         // connect(&m_timer, &QTimer::timeout, this, [this]() {
         //     m_testTime += 1000;

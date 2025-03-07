@@ -1,12 +1,14 @@
 #ifndef THREADMANAGER_H
 #define THREADMANAGER_H
 
+#include "avsync.h"
 #include "syncdata.h"
 
 #include <memory>
 #include <QMap>
 #include <QObject>
 
+class SDLWidget;
 class ThreadBase;
 class DemuxThread;
 class VideoDecodeThread;
@@ -29,13 +31,12 @@ public:
         VIDEO_DECODE, // 视频解码线程
         AUDIO_DECODE, // 音频解码线程
         VIDEO_RENDER, // 视频渲染线程
-        AUDIO_RENDER, // 音频渲染线程
 #ifdef ENABLE_LIVE_DANMU
-        SYNC,       // 同步线程
-        DANMAKU,    // 弹幕处理线程
-        LIVE_STREAM // 直播流接收线程
+        AUDIO_RENDER, // 音频渲染线程
+        DANMAKU,      // 弹幕处理线程
+        LIVE_STREAM   // 直播流接收线程
 #else
-        SYNC // 同步线程
+        AUDIO_RENDER // 音频渲染线程
 #endif
     };
 
@@ -46,6 +47,9 @@ public:
 
     // 初始化所有线程
     bool initializeThreads();
+
+    // 初始化线程间关联关系
+    bool initThreadLinkage(SDLWidget *renderWidget);
 
     // 开始所有线程
     bool startAllThreads();
@@ -68,7 +72,6 @@ public:
     AudioDecodeThread *getAudioDecodeThread();
     RenderThread      *getRenderThread();
     AudioRenderThread *getAudioRenderThread();
-    SyncThread        *getSyncThread();
 #ifdef ENABLE_LIVE_DANMU
     DanmakuThread    *getDanmakuThread();
     LiveStreamThread *getLiveStreamThread();
@@ -79,12 +82,6 @@ public:
 
     // 获取当前播放速度
     double getPlaybackSpeed() const;
-
-    // 设置音频采样率
-    void setAudioSampleRate(int sampleRate);
-
-    // 获取当前音频采样率
-    int getAudioSampleRate() const;
 
 signals:
     // 播放状态变化信号
@@ -106,8 +103,8 @@ private:
     // 是否正在播放
     bool m_isPlaying{false};
 
-    // 共享数据
-    std::shared_ptr<SyncData> m_syncData;
+    // 同步时钟
+    AVSync m_avSync;
 };
 
 #endif // THREADMANAGER_H

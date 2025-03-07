@@ -13,7 +13,6 @@ ThreadManager::ThreadManager(QObject *parent)
     : QObject(parent)
     , m_initialized(false)
     , m_isPlaying(false)
-    , m_syncData(nullptr)
 {}
 
 ThreadManager::~ThreadManager()
@@ -25,17 +24,7 @@ bool ThreadManager::openMedia(const QString &path)
 {
     auto demuxThd = getDemuxThread();
     auto bRet = demuxThd->openMedia(path);
-    if (!bRet)
-        return false;
-
-    auto videoThd = getVideoDecodeThread();
-    auto audioThd = getAudioDecodeThread();
-    bool bRet1 = videoThd->openDecoder(demuxThd->getVideoStreamIndex(),
-                                       demuxThd->videoCodecParameters());
-    bool bRet2 = audioThd->openDecoder(demuxThd->getAudioStreamIndex(),
-                                       demuxThd->audioCodecParameters());
-
-    return bRet1 && bRet2;
+    return bRet;
 }
 
 bool ThreadManager::initializeThreads()
@@ -58,7 +47,7 @@ bool ThreadManager::initializeThreads()
         m_threads[AUDIO_RENDER] = std::make_shared<AudioRenderThread>();
 
         // 同步线程
-        m_threads[SYNC] = std::make_shared<SyncThread>();
+        // m_threads[SYNC] = std::make_shared<SyncThread>();
 #ifdef ENABLE_LIVE_DANMU
         // 弹幕线程
         m_threads[DANMAKU] = std::make_shared<DanmakuThread>();
@@ -83,64 +72,63 @@ bool ThreadManager::initializeThreads()
             }
         }
 
-        // 设置线程之间的关联
-        // 例如: 将解复用线程的输出连接到解码线程的输入
-        // 具体的连接逻辑需要根据实际数据流向进行设置
-        auto demuxThd = getDemuxThread();
-        auto videoThd = getVideoDecodeThread();
-        auto audioThd = getAudioDecodeThread();
-        if (demuxThd && videoThd && audioThd) {
-            videoThd->setPacketQueue(demuxThd->videoPacketQueue());
-            audioThd->setPacketQueue(demuxThd->audioPacketQueue());
-        }
-
-        auto vRenderThd = getRenderThread();
-        auto aRenderThd = getAudioRenderThread();
-        if (videoThd && vRenderThd) {
-            vRenderThd->setVideoFrameQueue(videoThd->getFrameQueue());
-        }
-        if (audioThd && aRenderThd) {
-            aRenderThd->setAudioFrameQueue(audioThd->getFrameQueue());
-        }
-
-        m_syncData = std::make_shared<SyncData>();
-
-        // 设置默认的播放速度和音频采样率
-        m_syncData->setPlaybackSpeed(1.0);
-
-        // 从音频解码线程获取实际采样率（如果可用）
-        int sampleRate = 44100; // 默认采样率
-        if (audioThd) {
-            int decoderSampleRate = audioThd->getSampleRate();
-            if (decoderSampleRate > 0) {
-                sampleRate = decoderSampleRate;
-                qInfo() << "从解码器获取音频采样率:" << sampleRate << "Hz";
-            } else {
-                qInfo() << "使用默认音频采样率:" << sampleRate << "Hz";
-            }
-        }
-        m_syncData->setAudioSampleRate(sampleRate);
-
-        auto syncThd = getSyncThread();
-        if (vRenderThd && syncThd && aRenderThd) {
-            vRenderThd->setSyncData(m_syncData);
-            aRenderThd->setSyncData(m_syncData);
-            syncThd->setSyncData(m_syncData);
-
-            // 确保各线程使用相同的播放速度和采样率
-            // renderThd->setPlaybackSpeed(1.0);
-            syncThd->setPlaybackSpeed(1.0);
-            syncThd->setAudioSampleRate(sampleRate);
-
-            // connect(syncThd, &SyncThread::syncEvent, vRenderThd, &RenderThread::onSyncEvent);
-        }
-
         m_initialized = true;
         return true;
     } catch (const std::exception &e) {
         qWarning() << "初始化线程时发生异常：" << e.what();
         return false;
     }
+}
+
+bool ThreadManager::initThreadLinkage(SDLWidget *renderWidget)
+{
+    bool bRet = false;
+    // reset sync
+    m_avSync.initClock();
+
+    // demux -> decode (packetQueue)
+    auto demuxThd = getDemuxThread();
+    auto videoThd = getVideoDecodeThread();
+    auto audioThd = getAudioDecodeThread();
+    if (demuxThd && videoThd && audioThd) {
+        videoThd->setPacketQueue(demuxThd->videoPacketQueue());
+        videoThd->openDecoder(demuxThd->getVideoStreamIndex(), demuxThd->videoCodecParameters());
+        audioThd->setPacketQueue(demuxThd->audioPacketQueue());
+        audioThd->openDecoder(demuxThd->getAudioStreamIndex(), demuxThd->audioCodecParameters());
+    } else
+        return false;
+
+    // video decode -> video render (frameQueue)
+    auto vRenderThd = getRenderThread();
+    if (videoThd && vRenderThd) {
+        vRenderThd->setVideoFrameQueue(videoThd->getFrameQueue());
+    } else
+        return false;
+    // audio decode -> audio render (frameQueue)
+    auto aRenderThd = getAudioRenderThread();
+    if (audioThd && aRenderThd) {
+        aRenderThd->setAudioFrameQueue(audioThd->getFrameQueue());
+    } else
+        return false;
+
+    // videoRender
+    getRenderThread()->setVideoWidget(renderWidget);
+    bRet = getRenderThread()->initializeVideoRenderer(&m_avSync, getDemuxThread()->videoTimebase());
+    if (!bRet) {
+        qDebug() << "initializeVideoRenderer failed.";
+        return false;
+    }
+
+    // audioRender
+    bRet = getAudioRenderThread()->initializeAudioRenderer(&m_avSync,
+                                                           getDemuxThread()->audioTimebase(),
+                                                           getDemuxThread()->audioCodecParameters());
+    if (!bRet) {
+        qWarning() << "initializeAudioRenderer failed.";
+        return false;
+    }
+
+    return true;
 }
 
 bool ThreadManager::startAllThreads()
@@ -160,9 +148,6 @@ bool ThreadManager::startAllThreads()
     // 2. 启动解码线程
     m_threads[VIDEO_DECODE]->startProcess();
     m_threads[AUDIO_DECODE]->startProcess();
-
-    // 3. 启动同步线程
-    m_threads[SYNC]->startProcess();
 
     // 4. 启动渲染线程
     m_threads[VIDEO_RENDER]->startProcess();
@@ -227,17 +212,13 @@ void ThreadManager::stopAllThreads()
         m_threads[LIVE_STREAM]->stopProcess();
 #endif
 
-    // 2. 停止同步线程
-    if (m_threads.contains(SYNC))
-        m_threads[SYNC]->stopProcess();
-
-    // 3. 停止解码线程
+    // 2. 停止解码线程
     if (m_threads.contains(VIDEO_DECODE))
         m_threads[VIDEO_DECODE]->stopProcess();
     if (m_threads.contains(AUDIO_DECODE))
         m_threads[AUDIO_DECODE]->stopProcess();
 
-    // 4. 最后停止解复用线程
+    // 3. 最后停止解复用线程
     if (m_threads.contains(DEMUX))
         m_threads[DEMUX]->stopProcess();
 
@@ -287,11 +268,6 @@ AudioRenderThread *ThreadManager::getAudioRenderThread()
     return static_cast<AudioRenderThread *>(getThread(AUDIO_RENDER));
 }
 
-SyncThread *ThreadManager::getSyncThread()
-{
-    return static_cast<SyncThread *>(getThread(SYNC));
-}
-
 #ifdef ENABLE_LIVE_DANMU
 DanmakuThread *ThreadManager::getDanmakuThread()
 {
@@ -306,74 +282,10 @@ LiveStreamThread *ThreadManager::getLiveStreamThread()
 
 void ThreadManager::setPlaybackSpeed(double speed)
 {
-    if (!m_syncData) {
-        qWarning() << "同步数据对象尚未初始化，无法设置播放速度";
-        return;
-    }
-
-    if (speed <= 0.0) {
-        qWarning() << "播放速度设置无效，必须大于0，当前值:" << speed;
-        return;
-    }
-
-    // 设置同步数据中的播放速度
-    m_syncData->setPlaybackSpeed(speed);
-
-    // 更新同步线程的播放速度
-    auto syncThd = getSyncThread();
-    if (syncThd) {
-        syncThd->setPlaybackSpeed(speed);
-    }
-
-    // 更新渲染线程的播放速度
-    // auto renderThd = getRenderThread();
-    // if (renderThd) {
-    //     renderThd->setPlaybackSpeed(speed);
-    // }
-
     qInfo() << "播放速度已设置为:" << speed;
 }
 
 double ThreadManager::getPlaybackSpeed() const
 {
-    if (!m_syncData) {
-        qWarning() << "同步数据对象尚未初始化，无法获取播放速度";
-        return 1.0; // 默认播放速度
-    }
-
-    return m_syncData->getPlaybackSpeed();
-}
-
-void ThreadManager::setAudioSampleRate(int sampleRate)
-{
-    if (!m_syncData) {
-        qWarning() << "同步数据对象尚未初始化，无法设置音频采样率";
-        return;
-    }
-
-    if (sampleRate <= 0) {
-        qWarning() << "音频采样率设置无效，必须大于0，当前值:" << sampleRate;
-        return;
-    }
-
-    // 设置同步数据中的音频采样率
-    m_syncData->setAudioSampleRate(sampleRate);
-
-    // 更新同步线程的音频采样率
-    auto syncThd = getSyncThread();
-    if (syncThd) {
-        syncThd->setAudioSampleRate(sampleRate);
-    }
-
-    qInfo() << "音频采样率已设置为:" << sampleRate << "Hz";
-}
-
-int ThreadManager::getAudioSampleRate() const
-{
-    if (!m_syncData) {
-        qWarning() << "同步数据对象尚未初始化，无法获取音频采样率";
-        return 44100; // 默认采样率
-    }
-
-    return m_syncData->getAudioSampleRate();
+    return 0;
 }
