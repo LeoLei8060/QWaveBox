@@ -77,11 +77,11 @@ public:
     LiveStreamThread *getLiveStreamThread();
 #endif
 
-    // 设置播放速度
     void setPlaybackSpeed(double speed);
 
-    // 获取当前播放速度
     double getPlaybackSpeed() const;
+
+    double getCurrentPlayProgress();
 
 signals:
     // 播放状态变化信号

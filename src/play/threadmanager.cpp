@@ -289,3 +289,10 @@ double ThreadManager::getPlaybackSpeed() const
 {
     return 0;
 }
+
+double ThreadManager::getCurrentPlayProgress()
+{
+    int64_t duration = getDemuxThread()->getDuration();
+    double  progress = m_avSync.getClock() * 1000 / duration;
+    return progress;
+}
