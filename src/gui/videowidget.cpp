@@ -37,6 +37,16 @@ void VideoWidget::updateProgress(double val)
     ui->videoSlider->setValue(iVal);
 }
 
+void VideoWidget::updateTotalDurationStr(const QString &val)
+{
+    ui->label_totalduration->setText(val);
+}
+
+void VideoWidget::updateCurrentDurationStr(const QString &val)
+{
+    ui->label_currentduration->setText(val);
+}
+
 void VideoWidget::setupControls()
 {
     auto font = FontManager::instance()->fontAt(FontManager::IconFont);

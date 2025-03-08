@@ -27,6 +27,9 @@ public:
 
     void updateProgress(double val);
 
+    void updateTotalDurationStr(const QString &val);
+    void updateCurrentDurationStr(const QString &val);
+
 signals:
     void sigVolumeChanged(int volume);
 

@@ -83,6 +83,8 @@ public:
 
     double getCurrentPlayProgress();
 
+    int64_t getPlayDuration();
+
     void setVolume(int volume);
 
 signals:

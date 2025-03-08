@@ -297,6 +297,11 @@ double ThreadManager::getCurrentPlayProgress()
     return progress;
 }
 
+int64_t ThreadManager::getPlayDuration()
+{
+    return (int64_t) (m_avSync.getClock() * 1000);
+}
+
 void ThreadManager::setVolume(int volume)
 {
     auto audioThd = getAudioRenderThread();

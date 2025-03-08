@@ -1,6 +1,7 @@
 #include "MainWidget.h"
 #include "audiodecodethread.h"
 #include "audiorenderthread.h"
+#include "common.h"
 #include "demuxthread.h"
 #include "renderthread.h"
 #include "titlebar.h"
@@ -359,10 +360,20 @@ void MainWidget::onOpenFile()
             return;
         }
 
+        auto    ms = m_threadManager->getDemuxThread()->getDuration();
+        QString durationStr = millisecondToString(ms);
+        ui->videoWidget->updateTotalDurationStr(durationStr);
+
+        // 定时器更新UI
         m_timer.setInterval(500);
         connect(&m_timer, &QTimer::timeout, this, [this]() {
+            // 进度条更新
             double progress = m_threadManager->getCurrentPlayProgress();
             ui->videoWidget->updateProgress(progress);
+
+            // 时间更新
+            QString str = millisecondToString(m_threadManager->getPlayDuration());
+            ui->videoWidget->updateCurrentDurationStr(str);
         });
         m_timer.start();
     }
