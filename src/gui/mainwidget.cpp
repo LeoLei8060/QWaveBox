@@ -18,6 +18,7 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QScreen>
+#include <QStandardPaths>
 #include <QStyle>
 #include <QWindow>
 
@@ -342,7 +343,8 @@ void MainWidget::onOpenFile()
     QString filePath = QFileDialog::getOpenFileName(
         this,
         tr("打开文件"),
-        QString(),
+        QStandardPaths::writableLocation(QStandardPaths::MoviesLocation),
+        // QString(),
         tr("媒体文件 (*.mp3 *.mp4 *.avi *.mkv *.wav *.flac);;所有文件 (*.*)"));
 
     if (!filePath.isEmpty()) {
