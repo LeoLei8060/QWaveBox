@@ -60,9 +60,11 @@ set(GUI_FORMS
 
 set(UTILS_SOURCES
     src/utils/fontmanager.cpp
+    src/utils/common.cpp
 )
 set(UTILS_HEADERS
     src/utils/fontmanager.h
+    src/utils/common.h
 )
 
 set(CORE_SOURCES
