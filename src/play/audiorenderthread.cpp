@@ -257,7 +257,8 @@ void AudioRenderThread::sdlAudioCallback(void *userdata, Uint8 *stream, int len)
         // 调用实例方法处理音频回调
         self->audioCallback(stream, len);
 
-        if (self->m_volume != 1.0f) { // 避免不必要的计算
+        // 音量调节
+        if (self->m_volume != 1.0f) {
             Sint16 *samples = reinterpret_cast<Sint16 *>(stream);
             int     numSamples = len / sizeof(Sint16);
             for (int i = 0; i < numSamples; ++i) {
