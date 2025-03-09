@@ -76,6 +76,28 @@ QTabBar::tab:!selected {
     color: #777777;
 }
 
+
+QListView {
+    background-color: transparent;
+    border: none;
+    outline: 0;
+}
+
+QListView::item {
+    color: #AEAEAE;
+    background: transparent;
+    border: none;
+    padding: 4px;
+}
+
+QListView::item:selected {
+    color: white;
+}
+
+QListView::item:hover {
+    background-color: transparent;
+}
+
 /***** 通用滑块 *****/
 QSlider {
     background: transparent;
