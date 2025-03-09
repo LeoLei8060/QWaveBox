@@ -81,4 +81,6 @@ void VideoWidget::setupVideoWidget()
 void VideoWidget::initConnect()
 {
     connect(ui->voiceSlider, &QSlider::valueChanged, this, &VideoWidget::sigVolumeChanged);
+    connect(ui->playBtn, &QPushButton::clicked, this, &VideoWidget::sigStartPlay);
+    connect(ui->stopBtn, &QPushButton::clicked, this, &VideoWidget::sigStopPlay);
 }

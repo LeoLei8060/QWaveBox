@@ -44,7 +44,10 @@ public:
     void setAudioFrameQueue(AVFrameQueue *queue);
 
     // 初始化音频渲染器
-    bool initializeAudioRenderer(AVSync *sync, AVRational timebase, AVCodecParameters *audioParams);
+    bool initializeAudioRenderer(AVRational timebase, AVCodecParameters *audioParams);
+
+    // 绑定同步时钟
+    void setSync(AVSync *sync);
 
     // 关闭渲染器
     void closeRenderer();

@@ -33,6 +33,10 @@ public:
 signals:
     void sigVolumeChanged(int volume);
 
+    void sigStartPlay();
+    void sigPausePlay();
+    void sigStopPlay();
+
 private:
     void setupControls();
     void setupVideoWidget();

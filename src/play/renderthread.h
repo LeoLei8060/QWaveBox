@@ -38,7 +38,10 @@ public:
     void setVideoWidget(SDLWidget *widget);
 
     // 初始化视频渲染器
-    bool initializeVideoRenderer(AVSync *sync, AVRational timebase);
+    bool initializeVideoRenderer(AVRational timebase);
+
+    // 设置同步时钟
+    void setSync(AVSync *sync);
 
     // 关闭渲染器
     void closeRenderer();

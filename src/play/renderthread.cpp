@@ -54,7 +54,7 @@ void RenderThread::setVideoWidget(SDLWidget *widget)
     m_videoWidget = widget;
 }
 
-bool RenderThread::initializeVideoRenderer(AVSync *sync, AVRational timebase)
+bool RenderThread::initializeVideoRenderer(AVRational timebase)
 {
     if (!m_videoWidget) {
         qWarning() << "无效的视频渲染控件";
@@ -67,12 +67,16 @@ bool RenderThread::initializeVideoRenderer(AVSync *sync, AVRational timebase)
         return false;
     }
 
-    m_avSync = sync;
     m_timebase = timebase;
 
     m_videoInitialized = true;
     qInfo() << "视频渲染器初始化成功";
     return true;
+}
+
+void RenderThread::setSync(AVSync *sync)
+{
+    m_avSync = sync;
 }
 
 void RenderThread::closeRenderer()

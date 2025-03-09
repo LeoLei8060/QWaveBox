@@ -24,6 +24,11 @@ bool ThreadManager::openMedia(const QString &path)
 {
     auto demuxThd = getDemuxThread();
     auto bRet = demuxThd->openMedia(path);
+    if (!bRet) {
+        qWarning() << "openMedia failed.";
+        return false;
+    }
+    bRet = resetThreadLinkage();
     return bRet;
 }
 
@@ -72,63 +77,32 @@ bool ThreadManager::initializeThreads()
             }
         }
 
+        // 关联线程间数据
+        auto demuxThd = getDemuxThread();
+        auto videoThd = getVideoDecodeThread();
+        auto audioThd = getAudioDecodeThread();
+        auto vRenderThd = getRenderThread();
+        auto aRenderThd = getAudioRenderThread();
+        if (!demuxThd || !videoThd || !vRenderThd || !audioThd || !aRenderThd)
+            return false;
+
+        // demux -> decode (packetQueue)
+        videoThd->setPacketQueue(demuxThd->videoPacketQueue());
+        audioThd->setPacketQueue(demuxThd->audioPacketQueue());
+        // video decode -> video render (frameQueue)
+        vRenderThd->setVideoFrameQueue(videoThd->getFrameQueue());
+        // audio decode -> audio render (frameQueue)
+        aRenderThd->setAudioFrameQueue(audioThd->getFrameQueue());
+        // sync
+        vRenderThd->setSync(&m_avSync);
+        aRenderThd->setSync(&m_avSync);
+
         m_initialized = true;
         return true;
     } catch (const std::exception &e) {
         qWarning() << "初始化线程时发生异常：" << e.what();
         return false;
     }
-}
-
-bool ThreadManager::initThreadLinkage(SDLWidget *renderWidget)
-{
-    bool bRet = false;
-    // reset sync
-    m_avSync.initClock();
-
-    // demux -> decode (packetQueue)
-    auto demuxThd = getDemuxThread();
-    auto videoThd = getVideoDecodeThread();
-    auto audioThd = getAudioDecodeThread();
-    if (demuxThd && videoThd && audioThd) {
-        videoThd->setPacketQueue(demuxThd->videoPacketQueue());
-        videoThd->openDecoder(demuxThd->getVideoStreamIndex(), demuxThd->videoCodecParameters());
-        audioThd->setPacketQueue(demuxThd->audioPacketQueue());
-        audioThd->openDecoder(demuxThd->getAudioStreamIndex(), demuxThd->audioCodecParameters());
-    } else
-        return false;
-
-    // video decode -> video render (frameQueue)
-    auto vRenderThd = getRenderThread();
-    if (videoThd && vRenderThd) {
-        vRenderThd->setVideoFrameQueue(videoThd->getFrameQueue());
-    } else
-        return false;
-    // audio decode -> audio render (frameQueue)
-    auto aRenderThd = getAudioRenderThread();
-    if (audioThd && aRenderThd) {
-        aRenderThd->setAudioFrameQueue(audioThd->getFrameQueue());
-    } else
-        return false;
-
-    // videoRender
-    getRenderThread()->setVideoWidget(renderWidget);
-    bRet = getRenderThread()->initializeVideoRenderer(&m_avSync, getDemuxThread()->videoTimebase());
-    if (!bRet) {
-        qDebug() << "initializeVideoRenderer failed.";
-        return false;
-    }
-
-    // audioRender
-    bRet = getAudioRenderThread()->initializeAudioRenderer(&m_avSync,
-                                                           getDemuxThread()->audioTimebase(),
-                                                           getDemuxThread()->audioCodecParameters());
-    if (!bRet) {
-        qWarning() << "initializeAudioRenderer failed.";
-        return false;
-    }
-
-    return true;
 }
 
 bool ThreadManager::startAllThreads()
@@ -199,6 +173,7 @@ void ThreadManager::resumeAllThreads()
 
 void ThreadManager::stopAllThreads()
 {
+    qDebug() << __FUNCTION__;
     // 按照相反的顺序停止线程
     // 1. 先停止渲染和弹幕线程
     if (m_threads.contains(VIDEO_RENDER))
@@ -241,6 +216,13 @@ ThreadBase *ThreadManager::getThread(ThreadType type)
         return m_threads[type].get();
     }
     return nullptr;
+}
+
+void ThreadManager::setVideoRenderObj(SDLWidget *obj)
+{
+    auto vRender = getRenderThread();
+    if (vRender)
+        vRender->setVideoWidget(obj);
 }
 
 DemuxThread *ThreadManager::getDemuxThread()
@@ -307,4 +289,39 @@ void ThreadManager::setVolume(int volume)
     auto audioThd = getAudioRenderThread();
     if (audioThd)
         audioThd->setVolume(volume);
+}
+
+bool ThreadManager::resetThreadLinkage()
+{
+    bool bRet = false;
+    // reset sync
+    m_avSync.initClock();
+
+    // demux -> decode (packetQueue)
+    auto demuxThd = getDemuxThread();
+    auto videoThd = getVideoDecodeThread();
+    auto audioThd = getAudioDecodeThread();
+    auto vRenderThd = getRenderThread();
+    auto aRenderThd = getAudioRenderThread();
+    if (!demuxThd || !videoThd || !vRenderThd || !audioThd || !aRenderThd)
+        return false;
+    videoThd->openDecoder(demuxThd->getVideoStreamIndex(), demuxThd->videoCodecParameters());
+    audioThd->openDecoder(demuxThd->getAudioStreamIndex(), demuxThd->audioCodecParameters());
+
+    // videoRender
+    bRet = vRenderThd->initializeVideoRenderer(getDemuxThread()->videoTimebase());
+    if (!bRet) {
+        qDebug() << "initializeVideoRenderer failed.";
+        return false;
+    }
+
+    // audioRender
+    bRet = aRenderThd->initializeAudioRenderer(getDemuxThread()->audioTimebase(),
+                                               getDemuxThread()->audioCodecParameters());
+    if (!bRet) {
+        qWarning() << "initializeAudioRenderer failed.";
+        return false;
+    }
+
+    return true;
 }

@@ -293,16 +293,7 @@ void MainWidget::setupThreads()
         qWarning() << "线程管理器初始化失败...";
         return;
     }
-
-    // if (!m_threadManager->initThreadLinkage(ui->videoWidget->getSDLWidget())) {
-    //     qWarning() << "线程间关联关系初始化失败...";
-    //     return;
-    // }
-
-    // if (!m_threadManager->startAllThreads()) {
-    //     qWarning() << "线程启动失败...";
-    //     return;
-    // }
+    m_threadManager->setVideoRenderObj(ui->videoWidget->getSDLWidget());
 }
 
 void MainWidget::connectTitleBarSignals()
@@ -334,6 +325,9 @@ void MainWidget::setupVideoWidget()
     connect(ui->videoWidget, &VideoWidget::sigVolumeChanged, this, [this](int volume) {
         m_threadManager->setVolume(volume);
     });
+    connect(ui->videoWidget, &VideoWidget::sigStopPlay, this, [this]() {
+        m_threadManager->stopAllThreads();
+    });
 }
 
 void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
@@ -350,11 +344,6 @@ void MainWidget::onOpenFile(const QString &filePath)
         // TODO: 处理打开文件的逻辑
         qDebug() << "Opening file:" << filePath;
         m_threadManager->openMedia(filePath);
-
-        if (!m_threadManager->initThreadLinkage(ui->videoWidget->getSDLWidget())) {
-            qWarning() << "线程间关联关系初始化失败...";
-            return;
-        }
 
         if (!m_threadManager->startAllThreads()) {
             qWarning() << "线程启动失败...";

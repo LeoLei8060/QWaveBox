@@ -42,16 +42,13 @@ void AudioRenderThread::setAudioFrameQueue(AVFrameQueue *queue)
     m_audioFrameQueue = queue;
 }
 
-bool AudioRenderThread::initializeAudioRenderer(AVSync            *sync,
-                                                AVRational         timebase,
-                                                AVCodecParameters *audioParams)
+bool AudioRenderThread::initializeAudioRenderer(AVRational timebase, AVCodecParameters *audioParams)
 {
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         qWarning() << "SDL_Init(SDL_INIT_AUDIO) failed:" << SDL_GetError();
         return false;
     }
 
-    m_avSync = sync;
     m_timebase = timebase;
     m_codecpar = audioParams;
     // 转换：
@@ -94,6 +91,11 @@ bool AudioRenderThread::initializeAudioRenderer(AVSync            *sync,
 
     m_audioInitialized = true;
     return true;
+}
+
+void AudioRenderThread::setSync(AVSync *sync)
+{
+    m_avSync = sync;
 }
 
 void AudioRenderThread::closeRenderer()

@@ -48,9 +48,6 @@ public:
     // 初始化所有线程
     bool initializeThreads();
 
-    // 初始化线程间关联关系
-    bool initThreadLinkage(SDLWidget *renderWidget);
-
     // 开始所有线程
     bool startAllThreads();
 
@@ -65,6 +62,9 @@ public:
 
     // 获取指定线程
     ThreadBase *getThread(ThreadType type);
+
+    // 绑定视频渲染对象
+    void setVideoRenderObj(SDLWidget *obj);
 
     // 获取特定线程实例
     DemuxThread       *getDemuxThread();
@@ -96,6 +96,9 @@ signals:
 
     // 播放完成信号
     void playFinished();
+
+private:
+    bool resetThreadLinkage();
 
 private:
     // 存储所有线程的映射
