@@ -32,6 +32,33 @@ bool ThreadManager::openMedia(const QString &path)
     return bRet;
 }
 
+void ThreadManager::stopPlay()
+{
+    auto demuxThd = getDemuxThread();
+    auto videoThd = getVideoDecodeThread();
+    auto audioThd = getAudioDecodeThread();
+    auto vRenderThd = getRenderThread();
+    auto aRenderThd = getAudioRenderThread();
+    if (!demuxThd || !videoThd || !vRenderThd || !audioThd || !aRenderThd)
+        return;
+    // 4. 停止所有线程
+    stopAllThreads();
+    // demuxThd->stopProcess();
+    // audioThd->stopProcess();
+    // videoThd->stopProcess();
+    // aRenderThd->stopProcess();
+    // vRenderThd->stopProcess();
+    // 停止播放的具体流程：
+    // 1. 渲染线程关闭渲染器
+    aRenderThd->closeRenderer();
+    vRenderThd->closeRenderer();
+    // 2. 解码线程关闭解码器
+    audioThd->closeDecoder();
+    videoThd->closeDecoder();
+    // 3. 解复用线程关闭媒体
+    demuxThd->closeMedia();
+}
+
 bool ThreadManager::initializeThreads()
 {
     if (m_initialized) {
@@ -137,7 +164,7 @@ bool ThreadManager::startAllThreads()
 
     m_isPlaying = true;
     emit playStateChanged(m_isPlaying);
-
+    qDebug() << "startAllThreads ...";
     return true;
 }
 

@@ -43,7 +43,11 @@ public:
     explicit ThreadManager(QObject *parent = nullptr);
     ~ThreadManager();
 
+    // 打开媒体
     bool openMedia(const QString &path);
+
+    // 停止播放
+    void stopPlay();
 
     // 初始化所有线程
     bool initializeThreads();

@@ -4,6 +4,7 @@
 #include "common.h"
 #include "demuxthread.h"
 #include "renderthread.h"
+#include "sdlwidget.h"
 #include "titlebar.h"
 #include "ui_mainwidget.h"
 #include "videodecodethread.h"
@@ -326,7 +327,8 @@ void MainWidget::setupVideoWidget()
         m_threadManager->setVolume(volume);
     });
     connect(ui->videoWidget, &VideoWidget::sigStopPlay, this, [this]() {
-        m_threadManager->stopAllThreads();
+        m_threadManager->stopPlay();
+        ui->videoWidget->getSDLWidget()->reset();
     });
 }
 
