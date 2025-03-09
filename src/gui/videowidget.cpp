@@ -77,11 +77,15 @@ void VideoWidget::setupControls()
 {
     auto font = FontManager::instance()->fontAt(FontManager::IconFont);
 
-    ui->playBtn->setFont(font);
-    ui->playBtn->setText(PLAY_BTN_TEXT);
-
     ui->stopBtn->setFont(font);
     ui->stopBtn->setText(STOP_BTN_TEXT);
+
+    ui->playlistBtn->setFont(font);
+    ui->playlistBtn->setText(PLAYLIST_BTN_TEXT);
+
+    font.setPixelSize(16);
+    ui->playBtn->setFont(font);
+    ui->playBtn->setText(PLAY_BTN_TEXT);
 
     ui->previousBtn->setFont(font);
     ui->previousBtn->setText(PREV_BTN_TEXT);
@@ -91,9 +95,6 @@ void VideoWidget::setupControls()
 
     ui->openBtn->setFont(font);
     ui->openBtn->setText(OPEN_BTN_TEXT);
-
-    ui->playlistBtn->setFont(font);
-    ui->playlistBtn->setText(PLAYLIST_BTN_TEXT);
 
     ui->voiceBtn->setFont(font);
     ui->voiceBtn->setText(VOICE_BTN_TEXT);
