@@ -340,7 +340,6 @@ void MainWidget::setupVideoWidget()
     });
     connect(ui->videoWidget, &VideoWidget::sigStopPlay, this, [this]() {
         m_threadManager->stopPlay();
-        ui->videoWidget->getSDLWidget()->reset();
     });
 }
 
@@ -354,8 +353,9 @@ void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWidget::onOpenFile(const QString &filePath)
 {
+    if (AppContext::instance()->isPlaying())
+        m_threadManager->stopPlay();
     if (!filePath.isEmpty()) {
-        // TODO: 处理打开文件的逻辑
         qDebug() << "Opening file:" << filePath;
         m_threadManager->openMedia(filePath);
 

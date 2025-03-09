@@ -20,6 +20,10 @@ public:
     const PlayState getPlayState() const { return m_playState; }
     void            setPlayState(const PlayState &state);
 
+    inline bool isPlaying() { return m_playState == PlayState::PlayingState; }
+    inline bool isPauseed() { return m_playState == PlayState::PausedState; }
+    inline bool isStopped() { return m_playState == PlayState::StoppedState; }
+
 signals:
     void sigPlayStateChanged(PlayState state);
 

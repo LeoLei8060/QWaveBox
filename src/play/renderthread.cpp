@@ -83,6 +83,8 @@ void RenderThread::closeRenderer()
 {
     qDebug() << "关闭渲染器，准备释放资源...";
 
+    if (m_videoWidget)
+        m_videoWidget->reset();
     // 清理视频渲染器资源
     m_videoInitialized = false;
 
