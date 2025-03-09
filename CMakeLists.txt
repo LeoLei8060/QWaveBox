@@ -43,6 +43,8 @@ set(GUI_SOURCES
     src/gui/videowidget.cpp
     src/gui/playlistwidget.cpp
     src/gui/sdlwidget.cpp
+    src/gui/filelistmodel.cpp
+    src/gui/filelistview.cpp
 )
 set(GUI_HEADERS
     src/gui/titlebar.h
@@ -50,6 +52,8 @@ set(GUI_HEADERS
     src/gui/videowidget.h
     src/gui/playlistwidget.h
     src/gui/sdlwidget.h
+    src/gui/filelistmodel.h
+    src/gui/filelistview.h
 )
 set(GUI_FORMS
     src/gui/titlebar.ui
