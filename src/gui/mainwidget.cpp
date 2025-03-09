@@ -38,6 +38,7 @@ MainWidget::MainWidget(QWidget *parent)
     ui->playlistWidget->setCursor(Qt::ArrowCursor);
     ui->videoWidget->setCursor(Qt::ArrowCursor);
 
+    setupPlayListWidget();
     setupVideoWidget();
     // 初始化菜单和托盘
     setupMenu();
@@ -231,7 +232,7 @@ void MainWidget::setupMenu()
     m_menu->addAction(quitAction);
 
     // 连接信号和槽
-    connect(openFileAction, &QAction::triggered, this, &MainWidget::onOpenFile);
+    connect(openFileAction, &QAction::triggered, this, &MainWidget::onOpenFileDlg);
     connect(openFolderAction, &QAction::triggered, this, &MainWidget::onOpenFolder);
     connect(closeAction, &QAction::triggered, this, &MainWidget::onCloseToTray);
     connect(optionsAction, &QAction::triggered, this, &MainWidget::onOptions);
@@ -310,7 +311,7 @@ void MainWidget::connectTitleBarSignals()
         TitleBar *titleBar = qobject_cast<TitleBar *>(ui->titlebar);
         if (titleBar) {
             // 连接信号和槽
-            connect(titleBar, &TitleBar::openFileRequested, this, &MainWidget::onOpenFile);
+            connect(titleBar, &TitleBar::openFileRequested, this, &MainWidget::onOpenFileDlg);
             connect(titleBar, &TitleBar::openFolderRequested, this, &MainWidget::onOpenFolder);
             connect(titleBar, &TitleBar::closeToTrayRequested, this, &MainWidget::onCloseToTray);
             connect(titleBar, &TitleBar::optionsRequested, this, &MainWidget::onOptions);
@@ -321,6 +322,11 @@ void MainWidget::connectTitleBarSignals()
                     &MainWidget::onQuitApplication);
         }
     }
+}
+
+void MainWidget::setupPlayListWidget()
+{
+    connect(ui->playlistWidget, &PlaylistWidget::sigOpenFile, this, &MainWidget::onOpenFile);
 }
 
 void MainWidget::setupVideoWidget()
@@ -338,15 +344,8 @@ void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void MainWidget::onOpenFile()
+void MainWidget::onOpenFile(const QString &filePath)
 {
-    QString filePath = QFileDialog::getOpenFileName(
-        this,
-        tr("打开文件"),
-        QStandardPaths::writableLocation(QStandardPaths::MoviesLocation),
-        // QString(),
-        tr("媒体文件 (*.mp3 *.mp4 *.avi *.mkv *.wav *.flac);;所有文件 (*.*)"));
-
     if (!filePath.isEmpty()) {
         // TODO: 处理打开文件的逻辑
         qDebug() << "Opening file:" << filePath;
@@ -379,6 +378,18 @@ void MainWidget::onOpenFile()
         });
         m_timer.start();
     }
+}
+
+void MainWidget::onOpenFileDlg()
+{
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        tr("打开文件"),
+        QStandardPaths::writableLocation(QStandardPaths::MoviesLocation),
+        // QString(),
+        tr("媒体文件 (*.mp3 *.mp4 *.avi *.mkv *.wav *.flac);;所有文件 (*.*)"));
+
+    onOpenFile(filePath);
 }
 
 void MainWidget::onOpenFolder()

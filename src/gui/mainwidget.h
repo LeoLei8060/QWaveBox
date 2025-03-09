@@ -43,7 +43,7 @@ protected:
 
 private slots:
     // 处理TitleBar发出的信号的槽函数
-    void onOpenFile();
+    void onOpenFileDlg();
     void onOpenFolder();
     void onCloseToTray();
     void onOptions();
@@ -53,9 +53,13 @@ private slots:
     // 托盘图标槽函数
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
+    // 打开视频文件
+    void onOpenFile(const QString &filePath);
+
 private:
     // 初始化函数
     void connectTitleBarSignals();
+    void setupPlayListWidget();
     void setupVideoWidget();
     void setupMenu();
     void setupTrayIcon();

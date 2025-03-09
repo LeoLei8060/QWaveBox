@@ -9,6 +9,7 @@ PlaylistWidget::PlaylistWidget(QWidget *parent)
     ui->tabWidget->setAttribute(Qt::WA_StyledBackground);
 
     setupTabWidget();
+    setupComputerList();
 }
 
 PlaylistWidget::~PlaylistWidget()
@@ -25,4 +26,9 @@ void PlaylistWidget::setupTabWidget()
     m_addTabBtn = new QPushButton("+ 新建专辑", this);
     m_addTabBtn->setObjectName("AddPlaylistBtn");
     ui->tabWidget->setCornerWidget(m_addTabBtn, Qt::Corner::TopLeftCorner);
+}
+
+void PlaylistWidget::setupComputerList()
+{
+    connect(ui->listView, &FileListView::sigFileSelected, this, &PlaylistWidget::sigOpenFile);
 }

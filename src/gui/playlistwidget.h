@@ -16,8 +16,13 @@ public:
     explicit PlaylistWidget(QWidget *parent = nullptr);
     ~PlaylistWidget();
 
+signals:
+    void sigOpenFile(const QString &);
+
 private:
     void setupTabWidget();
+
+    void setupComputerList();
 
 private:
     Ui::PlaylistWidget *ui;
