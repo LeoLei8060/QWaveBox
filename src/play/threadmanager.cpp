@@ -17,7 +17,8 @@ ThreadManager::ThreadManager(QObject *parent)
 
 ThreadManager::~ThreadManager()
 {
-    stopAllThreads();
+    if (isPlaying())
+        stopPlay();
 }
 
 bool ThreadManager::openMedia(const QString &path)
@@ -41,21 +42,16 @@ void ThreadManager::stopPlay()
     auto aRenderThd = getAudioRenderThread();
     if (!demuxThd || !videoThd || !vRenderThd || !audioThd || !aRenderThd)
         return;
-    // 4. 停止所有线程
-    stopAllThreads();
-    // demuxThd->stopProcess();
-    // audioThd->stopProcess();
-    // videoThd->stopProcess();
-    // aRenderThd->stopProcess();
-    // vRenderThd->stopProcess();
     // 停止播放的具体流程：
-    // 1. 渲染线程关闭渲染器
+    // 停止所有线程
+    stopAllThreads();
+    // 渲染线程关闭渲染器
     aRenderThd->closeRenderer();
     vRenderThd->closeRenderer();
-    // 2. 解码线程关闭解码器
+    // 解码线程关闭解码器
     audioThd->closeDecoder();
     videoThd->closeDecoder();
-    // 3. 解复用线程关闭媒体
+    // 解复用线程关闭媒体
     demuxThd->closeMedia();
 }
 

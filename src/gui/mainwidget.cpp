@@ -210,6 +210,12 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *event)
     QWidget::mouseReleaseEvent(event);
 }
 
+void MainWidget::closeEvent(QCloseEvent *event)
+{
+    onQuitApplication();
+    event->ignore();
+}
+
 void MainWidget::setupMenu()
 {
     // 创建主菜单
@@ -221,7 +227,7 @@ void MainWidget::setupMenu()
     QAction *closeAction = new QAction(tr("关闭(F4)"), this);
     QAction *optionsAction = new QAction(tr("选项(F5)"), this);
     QAction *aboutAction = new QAction(tr("关于(F1)"), this);
-    QAction *quitAction = new QAction(tr("退出(Alt+F4)"), this);
+    QAction *quitAction = new QAction(tr("退出(Ctrl+F4)"), this);
 
     // 添加菜单项到菜单
     m_menu->addAction(openFileAction);
@@ -442,5 +448,6 @@ void MainWidget::onAbout()
 void MainWidget::onQuitApplication()
 {
     // 退出应用程序
+    m_threadManager->stopPlay();
     QApplication::quit();
 }

@@ -40,6 +40,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     // 处理TitleBar发出的信号的槽函数
