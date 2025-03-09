@@ -2,6 +2,7 @@
 #define THREADMANAGER_H
 
 #include "avsync.h"
+#include "constants.h"
 #include "syncdata.h"
 
 #include <memory>
@@ -93,16 +94,20 @@ public:
 
 signals:
     // 播放状态变化信号
-    void playStateChanged(bool isPlaying);
+    void sigPlayStateChanged(PlayState);
 
     // 播放错误信号
-    void playError(const QString &errorMsg);
+    void sigPlayError(const QString &errorMsg);
 
     // 播放完成信号
-    void playFinished();
+    void sigPlayFinished();
 
 private:
     bool resetThreadLinkage();
+
+    inline bool isPlaying() { return m_playState == PlayState::PlayingState; }
+    inline bool isPauseed() { return m_playState == PlayState::PausedState; }
+    inline bool isStopped() { return m_playState == PlayState::StoppedState; }
 
 private:
     // 存储所有线程的映射
@@ -111,8 +116,8 @@ private:
     // 是否已初始化
     bool m_initialized{false};
 
-    // 是否正在播放
-    bool m_isPlaying{false};
+    // 播放状态
+    PlayState m_playState;
 
     // 同步时钟
     AVSync m_avSync;

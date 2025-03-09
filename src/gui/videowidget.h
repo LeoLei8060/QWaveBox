@@ -30,6 +30,8 @@ public:
     void updateTotalDurationStr(const QString &val);
     void updateCurrentDurationStr(const QString &val);
 
+    void updateUIForStateChanged();
+
 signals:
     void sigVolumeChanged(int volume);
 

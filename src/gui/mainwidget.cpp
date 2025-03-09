@@ -1,4 +1,5 @@
 #include "MainWidget.h"
+#include "appcontext.h"
 #include "audiodecodethread.h"
 #include "audiorenderthread.h"
 #include "common.h"
@@ -59,7 +60,7 @@ MainWidget::MainWidget(QWidget *parent)
     }
 
     // 初始化线程管理器
-    setupThreads();
+    setupThreadManager();
 }
 
 MainWidget::~MainWidget()
@@ -287,7 +288,7 @@ void MainWidget::setupTrayIcon()
     m_trayIcon->show();
 }
 
-void MainWidget::setupThreads()
+void MainWidget::setupThreadManager()
 {
     m_threadManager = std::make_unique<ThreadManager>();
     if (!m_threadManager->initializeThreads()) {
@@ -295,6 +296,11 @@ void MainWidget::setupThreads()
         return;
     }
     m_threadManager->setVideoRenderObj(ui->videoWidget->getSDLWidget());
+
+    connect(m_threadManager.get(),
+            &ThreadManager::sigPlayStateChanged,
+            this,
+            &MainWidget::onPlayStateChanged);
 }
 
 void MainWidget::connectTitleBarSignals()
@@ -369,6 +375,12 @@ void MainWidget::onOpenFile(const QString &filePath)
         });
         m_timer.start();
     }
+}
+
+void MainWidget::onPlayStateChanged(PlayState state)
+{
+    AppContext::instance()->setPlayState(state);
+    ui->videoWidget->updateUIForStateChanged();
 }
 
 void MainWidget::onOpenFileDlg()

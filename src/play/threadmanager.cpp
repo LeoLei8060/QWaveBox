@@ -12,7 +12,7 @@
 ThreadManager::ThreadManager(QObject *parent)
     : QObject(parent)
     , m_initialized(false)
-    , m_isPlaying(false)
+    , m_playState(PlayState::StoppedState)
 {}
 
 ThreadManager::~ThreadManager()
@@ -91,7 +91,7 @@ bool ThreadManager::initializeThreads()
         // 连接线程的错误信号
         for (auto it = m_threads.begin(); it != m_threads.end(); ++it) {
             connect(it.value().get(), &ThreadBase::threadError, this, [this](const QString &error) {
-                emit playError(error);
+                emit sigPlayError(error);
                 stopAllThreads();
             });
         }
@@ -138,7 +138,7 @@ bool ThreadManager::startAllThreads()
         return false;
     }
 
-    if (m_isPlaying) {
+    if (isPlaying()) {
         return true;
     }
 
@@ -162,15 +162,15 @@ bool ThreadManager::startAllThreads()
     m_threads[LIVE_STREAM]->startProcess();
 #endif
 
-    m_isPlaying = true;
-    emit playStateChanged(m_isPlaying);
+    m_playState = PlayState::PlayingState;
+    emit sigPlayStateChanged(m_playState);
     qDebug() << "startAllThreads ...";
     return true;
 }
 
 void ThreadManager::pauseAllThreads()
 {
-    if (!m_isPlaying) {
+    if (!isPlaying()) {
         return;
     }
 
@@ -179,13 +179,13 @@ void ThreadManager::pauseAllThreads()
         it.value()->pauseProcess();
     }
 
-    m_isPlaying = false;
-    emit playStateChanged(m_isPlaying);
+    m_playState = PlayState::PausedState;
+    emit sigPlayStateChanged(m_playState);
 }
 
 void ThreadManager::resumeAllThreads()
 {
-    if (m_isPlaying) {
+    if (isPlaying()) {
         return;
     }
 
@@ -194,8 +194,8 @@ void ThreadManager::resumeAllThreads()
         it.value()->resumeProcess();
     }
 
-    m_isPlaying = true;
-    emit playStateChanged(m_isPlaying);
+    m_playState = PlayState::PlayingState;
+    emit sigPlayStateChanged(m_playState);
 }
 
 void ThreadManager::stopAllThreads()
@@ -231,9 +231,9 @@ void ThreadManager::stopAllThreads()
         }
     }
 
-    if (m_isPlaying) {
-        m_isPlaying = false;
-        emit playStateChanged(m_isPlaying);
+    if (isPlaying()) {
+        m_playState = PlayState::StoppedState;
+        emit sigPlayStateChanged(m_playState);
     }
 }
 

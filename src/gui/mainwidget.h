@@ -56,6 +56,9 @@ private slots:
     // 打开视频文件
     void onOpenFile(const QString &filePath);
 
+    // 更新播放状态
+    void onPlayStateChanged(PlayState state);
+
 private:
     // 初始化函数
     void connectTitleBarSignals();
@@ -63,7 +66,7 @@ private:
     void setupVideoWidget();
     void setupMenu();
     void setupTrayIcon();
-    void setupThreads();
+    void setupThreadManager();
 
 private:
     Ui::MainWidget *ui;
