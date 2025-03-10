@@ -11,13 +11,13 @@ AppContext *AppContext::instance()
     return s_instance;
 }
 
-void AppContext::setPlayState(const PlayState &state)
-{
-    if (m_playState == state)
-        return;
-    m_playState = state;
-    emit sigPlayStateChanged(m_playState);
-}
+// void AppContext::setPlayState(const PlayState &state)
+// {
+//     if (m_playState == state)
+//         return;
+//     m_playState = state;
+//     emit sigPlayStateChanged(m_playState);
+// }
 
 AppContext::AppContext(QObject *parent)
     : QObject(parent)

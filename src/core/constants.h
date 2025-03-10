@@ -7,4 +7,9 @@ enum class PlayState {
     PausedState       // 暂停状态
 };
 
+enum class VoiceState {
+    NormalState = 0, // 正常状态
+    MuteState        // 静音状态
+};
+
 #endif // CONSTANTS_H
