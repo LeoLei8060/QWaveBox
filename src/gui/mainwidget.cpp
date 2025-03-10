@@ -307,6 +307,10 @@ void MainWidget::setupThreadManager()
             &ThreadManager::sigPlayStateChanged,
             this,
             &MainWidget::onPlayStateChanged);
+    connect(m_threadManager.get(),
+            &ThreadManager::sigVoiceStateChanged,
+            this,
+            &MainWidget::onVoiceStateChanged);
 }
 
 void MainWidget::connectTitleBarSignals()
@@ -386,6 +390,12 @@ void MainWidget::onOpenFile(const QString &filePath)
 void MainWidget::onPlayStateChanged(PlayState state)
 {
     AppContext::instance()->setPlayState(state);
+    ui->videoWidget->updateUIForStateChanged();
+}
+
+void MainWidget::onVoiceStateChanged(VoiceState state)
+{
+    AppContext::instance()->setVoiceState(state);
     ui->videoWidget->updateUIForStateChanged();
 }
 

@@ -102,6 +102,9 @@ signals:
     // 播放完成信号
     void sigPlayFinished();
 
+    // 音量变化信号
+    void sigVoiceStateChanged(VoiceState);
+
 private:
     bool resetThreadLinkage();
 
@@ -118,6 +121,9 @@ private:
 
     // 播放状态
     PlayState m_playState;
+
+    // 音量状态
+    VoiceState m_voiceState;
 
     // 同步时钟
     AVSync m_avSync;

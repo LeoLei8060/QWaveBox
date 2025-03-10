@@ -312,6 +312,13 @@ void ThreadManager::setVolume(int volume)
     auto audioThd = getAudioRenderThread();
     if (audioThd)
         audioThd->setVolume(volume);
+    if (0 == volume && m_voiceState != VoiceState::MuteState) {
+        m_voiceState = VoiceState::MuteState;
+        emit sigVoiceStateChanged(m_voiceState);
+    } else if (0 != volume && m_voiceState == VoiceState::MuteState) {
+        m_voiceState = VoiceState::NormalState;
+        emit sigVoiceStateChanged(m_voiceState);
+    }
 }
 
 bool ThreadManager::resetThreadLinkage()

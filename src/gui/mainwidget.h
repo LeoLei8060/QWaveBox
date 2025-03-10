@@ -59,6 +59,8 @@ private slots:
 
     // 更新播放状态
     void onPlayStateChanged(PlayState state);
+    // 更新声音状态
+    void onVoiceStateChanged(VoiceState state);
 
 private:
     // 初始化函数

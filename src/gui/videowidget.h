@@ -46,6 +46,7 @@ private:
 
 private:
     Ui::VideoWidget *ui;
+    int              m_volume{99};
 };
 
 #endif // VIDEOWIDGET_H

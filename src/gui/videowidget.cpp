@@ -60,17 +60,22 @@ void VideoWidget::updateCurrentDurationStr(const QString &val)
 
 void VideoWidget::updateUIForStateChanged()
 {
-    auto state = AppContext::instance()->getPlayState();
-    if (state == PlayState::PlayingState) {
+    auto playState = AppContext::instance()->getPlayState();
+    if (playState == PlayState::PlayingState) {
         // 正在播放状态
         ui->playBtn->setText(PAUSE_BTN_TEXT);
-    } else if (state == PlayState::PausedState) {
+    } else if (playState == PlayState::PausedState) {
         // 暂停状态
         ui->playBtn->setText(PLAY_BTN_TEXT);
     } else {
         // 停止状态
         ui->playBtn->setText(PLAY_BTN_TEXT);
     }
+
+    if (AppContext::instance()->isMute())
+        ui->voiceBtn->setText(MUTE_BTN_TEXT);
+    else
+        ui->voiceBtn->setText(VOICE_BTN_TEXT);
 }
 
 void VideoWidget::setupControls()
@@ -107,7 +112,13 @@ void VideoWidget::setupVideoWidget()
 
 void VideoWidget::initConnect()
 {
-    connect(ui->voiceSlider, &QSlider::valueChanged, this, &VideoWidget::sigVolumeChanged);
+    connect(ui->voiceSlider, &QSlider::valueChanged, this, [this](int volume) {
+        m_volume = volume;
+        emit sigVolumeChanged(m_volume);
+    });
     connect(ui->playBtn, &QPushButton::clicked, this, &VideoWidget::sigStartPlay);
     connect(ui->stopBtn, &QPushButton::clicked, this, &VideoWidget::sigStopPlay);
+    connect(ui->voiceBtn, &QPushButton::clicked, this, [this]() {
+        emit sigVolumeChanged(AppContext::instance()->isMute() ? m_volume : 0);
+    });
 }
