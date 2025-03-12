@@ -74,7 +74,8 @@ bool VideoDecodeThread::openDecoder(int streamIndex, AVCodecParameters *codecPar
     }
 
     // 设置解码器线程数
-    m_codecContext->thread_count = 4; // 使用多线程解码
+    m_codecContext->thread_type = FF_THREAD_FRAME; // 明确使用帧级多线程
+    m_codecContext->thread_count = 4;              // 使用多线程解码
 
     // 打开解码器
     if (avcodec_open2(m_codecContext, decoder, nullptr) < 0) {
@@ -109,6 +110,7 @@ void VideoDecodeThread::closeDecoder()
 
 void VideoDecodeThread::flush()
 {
+    QMutexLocker locker(&m_flushMutex);
     if (m_codecContext) {
         // 刷新解码器
         avcodec_flush_buffers(m_codecContext);
@@ -133,6 +135,7 @@ void VideoDecodeThread::process()
         return;
     }
 
+    QMutexLocker locker(&m_flushMutex);
     // 从包队列中获取一个包
     AVPacket *packet = m_packetQueue->dequeue(10);
 

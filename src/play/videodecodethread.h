@@ -69,6 +69,8 @@ private:
 
     // 流索引
     int m_streamIndex{-1};
+
+    QMutex m_flushMutex;
 };
 
 #endif // VIDEODECODETHREAD_H
