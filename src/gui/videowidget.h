@@ -41,6 +41,10 @@ signals:
 
     void sigSeekTo(int);
 
+private slots:
+    void onPreviousBtnClicked();
+    void onNextBtnClicked();
+
 private:
     void setupControls();
     void setupVideoWidget();

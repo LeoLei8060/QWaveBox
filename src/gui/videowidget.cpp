@@ -15,6 +15,9 @@
 #define MUTE_BTN_TEXT     QChar(0xe611)
 #define OPEN_BTN_TEXT     QChar(0xe6d3)
 
+// 快进/快退的时间跨度：10秒
+#define TIMESPAN 10 * 1000
+
 VideoWidget::VideoWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::VideoWidget)
@@ -81,6 +84,18 @@ void VideoWidget::updateUIForStateChanged()
         ui->voiceBtn->setText(VOICE_BTN_TEXT);
 }
 
+void VideoWidget::onPreviousBtnClicked()
+{
+    int  span = -TIMESPAN;
+    emit sigSeekTo(ui->videoSlider->value() + span);
+}
+
+void VideoWidget::onNextBtnClicked()
+{
+    int  span = TIMESPAN;
+    emit sigSeekTo(ui->videoSlider->value() + span);
+}
+
 void VideoWidget::setupControls()
 {
     auto font = FontManager::instance()->fontAt(FontManager::IconFont);
@@ -124,6 +139,8 @@ void VideoWidget::initConnect()
     connect(ui->voiceBtn, &QPushButton::clicked, this, [this]() {
         emit sigVolumeChanged(AppContext::instance()->isMute() ? m_volume : 0);
     });
+    connect(ui->previousBtn, &QPushButton::clicked, this, &VideoWidget::onPreviousBtnClicked);
+    connect(ui->nextBtn, &QPushButton::clicked, this, &VideoWidget::onNextBtnClicked);
 
     connect(ui->videoSlider, &ClickMovableSlider::sigSeekTo, this, &VideoWidget::sigSeekTo);
 }
