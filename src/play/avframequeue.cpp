@@ -116,13 +116,17 @@ AVFrame *AVFrameQueue::dequeue(int timeoutMs)
 AVFrame *AVFrameQueue::front()
 {
     QMutexLocker locker(&m_mutex);
+    if (m_frames.empty())
+        return nullptr;
     return m_frames.front();
 }
 
 AVFrame *AVFrameQueue::pop()
 {
     QMutexLocker locker(&m_mutex);
-    AVFrame     *val = m_frames.front();
+    if (m_frames.empty())
+        return nullptr;
+    AVFrame *val = m_frames.front();
     m_frames.pop();
     return val;
 }
