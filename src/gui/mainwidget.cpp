@@ -345,6 +345,12 @@ void MainWidget::setupVideoWidget()
     connect(ui->videoWidget, &VideoWidget::sigStopPlay, this, [this]() {
         m_threadManager->stopPlay();
     });
+    connect(ui->videoWidget, &VideoWidget::sigStartPlay, this, [this]() {
+        if (m_threadManager->isPlaying())
+            m_threadManager->pausePlay();
+        else
+            m_threadManager->resumePlay();
+    });
     connect(ui->videoWidget, &VideoWidget::sigSeekTo, this, &MainWidget::onSeekTo);
 }
 

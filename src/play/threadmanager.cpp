@@ -55,6 +55,27 @@ void ThreadManager::stopPlay()
     demuxThd->closeMedia();
 }
 
+void ThreadManager::pausePlay()
+{
+    auto aRenderThd = getAudioRenderThread();
+    if (!aRenderThd)
+        return;
+
+    pauseAllThreads();
+    aRenderThd->pausePlay();
+}
+
+void ThreadManager::resumePlay()
+{
+    if (isPauseed())
+        resumeAllThreads();
+
+    auto aRenderThd = getAudioRenderThread();
+    if (!aRenderThd)
+        return;
+    aRenderThd->resumePlay();
+}
+
 void ThreadManager::seekToPosition(int64_t position)
 {
     auto demuxThd = getDemuxThread();

@@ -128,6 +128,16 @@ void AudioRenderThread::closeRenderer()
     qDebug() << "渲染器资源释放完毕";
 }
 
+void AudioRenderThread::pausePlay()
+{
+    SDL_PauseAudioDevice(m_audioDevice, 1);
+}
+
+void AudioRenderThread::resumePlay()
+{
+    SDL_PauseAudioDevice(m_audioDevice, 0);
+}
+
 void AudioRenderThread::setVolume(int volume)
 {
     double val = volume / 100.0;

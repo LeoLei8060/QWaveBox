@@ -52,6 +52,9 @@ public:
     // 关闭渲染器
     void closeRenderer();
 
+    void pausePlay();
+    void resumePlay();
+
     void setVolume(int volume);
 
 protected:

@@ -50,6 +50,12 @@ public:
     // 停止播放
     void stopPlay();
 
+    // 暂停播放
+    void pausePlay();
+
+    // 继续播放
+    void resumePlay();
+
     // 跳转播放
     void seekToPosition(int64_t position);
 
@@ -95,6 +101,10 @@ public:
 
     void setVolume(int volume);
 
+    inline bool isPlaying() { return m_playState == PlayState::PlayingState; }
+    inline bool isPauseed() { return m_playState == PlayState::PausedState; }
+    inline bool isStopped() { return m_playState == PlayState::StoppedState; }
+
 signals:
     // 播放状态变化信号
     void sigPlayStateChanged(PlayState);
@@ -110,10 +120,6 @@ signals:
 
 private:
     bool resetThreadLinkage();
-
-    inline bool isPlaying() { return m_playState == PlayState::PlayingState; }
-    inline bool isPauseed() { return m_playState == PlayState::PausedState; }
-    inline bool isStopped() { return m_playState == PlayState::StoppedState; }
 
 private:
     // 存储所有线程的映射
