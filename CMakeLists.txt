@@ -45,6 +45,7 @@ set(GUI_SOURCES
     src/gui/sdlwidget.cpp
     src/gui/filelistmodel.cpp
     src/gui/filelistview.cpp
+    src/gui/clickmovableslider.cpp
 )
 set(GUI_HEADERS
     src/gui/titlebar.h
@@ -54,6 +55,7 @@ set(GUI_HEADERS
     src/gui/sdlwidget.h
     src/gui/filelistmodel.h
     src/gui/filelistview.h
+    src/gui/clickmovableslider.h
 )
 set(GUI_FORMS
     src/gui/titlebar.ui
