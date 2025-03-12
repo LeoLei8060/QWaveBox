@@ -50,6 +50,9 @@ public:
     // 停止播放
     void stopPlay();
 
+    // 跳转播放
+    void seekToPosition(int64_t position);
+
     // 初始化所有线程
     bool initializeThreads();
 

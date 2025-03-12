@@ -63,9 +63,12 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QSlider" name="videoSlider">
+       <widget class="ClickMovableSlider" name="videoSlider">
         <property name="maximum">
          <number>99999</number>
+        </property>
+        <property name="tracking">
+         <bool>false</bool>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -92,7 +95,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="voiceSlider">
+       <widget class="ClickMovableSlider" name="voiceSlider">
         <property name="minimumSize">
          <size>
           <width>80</width>
@@ -329,6 +332,11 @@
    <extends>QWidget</extends>
    <header>sdlwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ClickMovableSlider</class>
+   <extends>QSlider</extends>
+   <header>clickmovableslider.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

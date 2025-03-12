@@ -1,5 +1,6 @@
 #include "videowidget.h"
 #include "appcontext.h"
+#include "common.h"
 #include "fontmanager.h"
 #include "ui_videowidget.h"
 #include <QDebug>
@@ -44,13 +45,15 @@ void VideoWidget::updateProgress(double val)
 {
     // 进度条的范围[0, 99999]
     // val值是百分比，需要乘以100000
-    int iVal = val * 100000;
-    ui->videoSlider->setValue(iVal);
+    // int iVal = val * 100000;
+    ui->videoSlider->setValue(val);
 }
 
-void VideoWidget::updateTotalDurationStr(const QString &val)
+void VideoWidget::updateTotalDurationStr(int64_t val)
 {
-    ui->label_totalduration->setText(val);
+    QString durationStr = millisecondToString(val);
+    ui->label_totalduration->setText(durationStr);
+    ui->videoSlider->setMaximum(val);
 }
 
 void VideoWidget::updateCurrentDurationStr(const QString &val)
@@ -121,4 +124,6 @@ void VideoWidget::initConnect()
     connect(ui->voiceBtn, &QPushButton::clicked, this, [this]() {
         emit sigVolumeChanged(AppContext::instance()->isMute() ? m_volume : 0);
     });
+
+    connect(ui->videoSlider, &ClickMovableSlider::sigSeekTo, this, &VideoWidget::sigSeekTo);
 }

@@ -55,6 +55,20 @@ void ThreadManager::stopPlay()
     demuxThd->closeMedia();
 }
 
+void ThreadManager::seekToPosition(int64_t position)
+{
+    auto demuxThd = getDemuxThread();
+    auto videoThd = getVideoDecodeThread();
+    auto audioThd = getAudioDecodeThread();
+    if (demuxThd && isPlaying()) {
+        // TODO: 暂时只处理正在播放时的跳转
+        qDebug() << __FUNCTION__ << position;
+        demuxThd->seekTo(position);
+        videoThd->flush();
+        audioThd->flush();
+    }
+}
+
 bool ThreadManager::initializeThreads()
 {
     if (m_initialized) {
@@ -297,8 +311,7 @@ double ThreadManager::getPlaybackSpeed() const
 
 double ThreadManager::getCurrentPlayProgress()
 {
-    int64_t duration = getDemuxThread()->getDuration();
-    double  progress = m_avSync.getClock() * 1000 / duration;
+    double progress = m_avSync.getClock() * 1000;
     return progress;
 }
 

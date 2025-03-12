@@ -345,6 +345,7 @@ void MainWidget::setupVideoWidget()
     connect(ui->videoWidget, &VideoWidget::sigStopPlay, this, [this]() {
         m_threadManager->stopPlay();
     });
+    connect(ui->videoWidget, &VideoWidget::sigSeekTo, this, &MainWidget::onSeekTo);
 }
 
 void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
@@ -368,9 +369,8 @@ void MainWidget::onOpenFile(const QString &filePath)
             return;
         }
 
-        auto    ms = m_threadManager->getDemuxThread()->getDuration();
-        QString durationStr = millisecondToString(ms);
-        ui->videoWidget->updateTotalDurationStr(durationStr);
+        auto ms = m_threadManager->getDemuxThread()->getDuration();
+        ui->videoWidget->updateTotalDurationStr(ms);
 
         // 定时器更新UI
         m_timer.setInterval(500);
@@ -397,6 +397,13 @@ void MainWidget::onVoiceStateChanged(VoiceState state)
 {
     AppContext::instance()->setVoiceState(state);
     ui->videoWidget->updateUIForStateChanged();
+}
+
+void MainWidget::onSeekTo(int position)
+{
+    // position = 当前视频位置（ms）
+    qDebug() << __FUNCTION__ << position;
+    m_threadManager->seekToPosition(position);
 }
 
 void MainWidget::onOpenFileDlg()

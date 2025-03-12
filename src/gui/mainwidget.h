@@ -62,6 +62,9 @@ private slots:
     // 更新声音状态
     void onVoiceStateChanged(VoiceState state);
 
+    // 播放进度跳转
+    void onSeekTo(int position);
+
 private:
     // 初始化函数
     void connectTitleBarSignals();

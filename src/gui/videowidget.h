@@ -27,7 +27,7 @@ public:
 
     void updateProgress(double val);
 
-    void updateTotalDurationStr(const QString &val);
+    void updateTotalDurationStr(int64_t val);
     void updateCurrentDurationStr(const QString &val);
 
     void updateUIForStateChanged();
@@ -38,6 +38,8 @@ signals:
     void sigStartPlay();
     void sigPausePlay();
     void sigStopPlay();
+
+    void sigSeekTo(int);
 
 private:
     void setupControls();

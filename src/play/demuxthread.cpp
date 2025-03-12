@@ -264,12 +264,6 @@ void DemuxThread::process()
         return;
     }
 
-    // // 队列不为空，发送包数据->解码线程
-    // if (!m_videoPacketQueue->isEmpty() && !m_audioPacketQueue->isEmpty()) {
-    //     emit sigSendVideoPacket(m_videoPacketQueue->dequeue());
-    //     emit sigSendAudioPacket(m_audioPacketQueue->dequeue());
-    // }
-
     // 队列未满时继续读取包
     if (!m_videoPacketQueue->isFull() && !m_audioPacketQueue->isFull() && !m_isEof) {
         if (!readPacket()) {
