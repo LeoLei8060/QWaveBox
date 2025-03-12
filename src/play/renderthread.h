@@ -59,6 +59,7 @@ private:
 
 private:
     AVFrameQueue *m_videoFrameQueue{nullptr};
+    AVFrame      *m_currentRenderFrame{nullptr};
 
     SDLWidget *m_videoWidget{nullptr};
 

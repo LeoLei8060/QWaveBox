@@ -93,25 +93,24 @@ void RenderThread::closeRenderer()
 
 void RenderThread::process()
 {
-    AVFrame *videoFrame = nullptr;
-
     // 获取视频帧
-    if (m_videoInitialized && m_videoFrameQueue && !m_videoFrameQueue->isEmpty())
-        videoFrame = m_videoFrameQueue->front();
+    if (!m_currentRenderFrame && m_videoInitialized && m_videoFrameQueue
+        && !m_videoFrameQueue->isEmpty())
+        m_currentRenderFrame = m_videoFrameQueue->dequeue(1);
 
     double sleepTime = 0;
 
     // 处理视频帧
-    if (videoFrame) {
-        double tm = videoFrame->pts * av_q2d(m_timebase);
+    if (m_currentRenderFrame) {
+        double tm = m_currentRenderFrame->pts * av_q2d(m_timebase);
         double diff = tm - m_avSync->getClock();
         if (diff > 0) {
             sleepTime = FFMIN(sleepTime, diff);
             return;
         }
-        renderVideoFrame(videoFrame);
-        m_videoFrameQueue->pop();
-        av_frame_free(&videoFrame);
+        renderVideoFrame(m_currentRenderFrame);
+        av_frame_free(&m_currentRenderFrame);
+        m_currentRenderFrame = nullptr;
     }
 
     // 检查是否都已结束

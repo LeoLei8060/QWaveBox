@@ -238,7 +238,12 @@ bool DemuxThread::seekTo(int64_t position)
 
     // 将毫秒转换为微秒（FFmpeg内部时间基准）
     int64_t seekTarget = position * 1000;
-    int     ret = avformat_seek_file(m_formatContext, -1, INT64_MIN, seekTarget, INT64_MAX, 0);
+    int     ret = avformat_seek_file(m_formatContext,
+                                 -1,
+                                 INT64_MIN,
+                                 seekTarget,
+                                 INT64_MAX,
+                                 AVSEEK_FLAG_BACKWARD);
 
     if (ret < 0) {
         qWarning() << "Seek失败:" << position;
@@ -338,18 +343,7 @@ bool DemuxThread::readPacket()
         enqueued = m_audioPacketQueue->enqueue(packet);
     }
 
-    // qDebug() << __FUNCTION__ << "  " << packet->dts;
-
-    // 释放原始包（队列中已经有了引用副本）
     av_packet_free(&packet);
-
-    // 更新当前播放位置
-    // if (m_formatContext->streams && m_videoStreamIndex >= 0) {
-    //     AVStream *stream = m_formatContext->streams[m_videoStreamIndex];
-    //     if (packet->pts != AV_NOPTS_VALUE) {
-    //         m_currentPosition = packet->pts * av_q2d(stream->time_base) * 1000;
-    //     }
-    // }
 
     return enqueued;
 }

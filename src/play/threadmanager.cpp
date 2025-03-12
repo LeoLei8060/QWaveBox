@@ -60,12 +60,33 @@ void ThreadManager::seekToPosition(int64_t position)
     auto demuxThd = getDemuxThread();
     auto videoThd = getVideoDecodeThread();
     auto audioThd = getAudioDecodeThread();
+    auto vRenderThd = getRenderThread();
+    auto aRenderThd = getAudioRenderThread();
+
     if (demuxThd && isPlaying()) {
-        // TODO: 暂时只处理正在播放时的跳转
-        qDebug() << __FUNCTION__ << position;
+        // 1. 暂停所有线程
+        videoThd->pauseProcess();
+        audioThd->pauseProcess();
+        demuxThd->pauseProcess();
+        vRenderThd->pauseProcess();
+        aRenderThd->pauseProcess();
+
+        // 2. 执行 Seek 操作
         demuxThd->seekTo(position);
-        videoThd->flush();
-        audioThd->flush();
+
+        // 3. 刷新解码器（需确保线程已暂停）
+        if (videoThd->isPaused() && audioThd->isPaused()) {
+            m_avSync.initClock();
+            audioThd->flush();
+            videoThd->flush();
+        }
+
+        // 4. 恢复线程
+        demuxThd->resumeProcess();
+        videoThd->resumeProcess();
+        audioThd->resumeProcess();
+        vRenderThd->resumeProcess();
+        aRenderThd->resumeProcess();
     }
 }
 
