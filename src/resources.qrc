@@ -3,5 +3,6 @@
         <file>resources/iconFont/iconfont.ttf</file>
         <file>resources/black.qss</file>
         <file>resources/wavebox.ico</file>
+        <file>resources/backimage.png</file>
     </qresource>
 </RCC>
