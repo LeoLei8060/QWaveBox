@@ -18,11 +18,15 @@
 // 快进/快退的时间跨度：10秒
 #define TIMESPAN 10 * 1000
 
+// 时间Label默认字符串
+#define TIMELABEL_DEF "00:00:00"
+
 VideoWidget::VideoWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::VideoWidget)
 {
     ui->setupUi(this);
+    ui->voiceBtn->setChecked(false); // 初始播放进度条禁用状态
 
     setupControls();
     setupVideoWidget();
@@ -70,12 +74,17 @@ void VideoWidget::updateUIForStateChanged()
     if (playState == PlayState::PlayingState) {
         // 正在播放状态
         ui->playBtn->setText(PAUSE_BTN_TEXT);
+        ui->videoSlider->setDisabled(false);
     } else if (playState == PlayState::PausedState) {
         // 暂停状态
         ui->playBtn->setText(PLAY_BTN_TEXT);
     } else {
         // 停止状态
         ui->playBtn->setText(PLAY_BTN_TEXT);
+        ui->videoSlider->setValue(0);
+        ui->videoSlider->setDisabled(true);
+        ui->label_currentduration->setText(TIMELABEL_DEF);
+        ui->label_totalduration->setText(TIMELABEL_DEF);
     }
 
     if (AppContext::instance()->isMute()) {
