@@ -358,6 +358,12 @@ void MainWidget::setupVideoWidget()
     });
     connect(ui->videoWidget, &VideoWidget::sigSeekTo, this, &MainWidget::onSeekTo);
     connect(ui->videoWidget, &VideoWidget::sigOpenFileDlg, this, &MainWidget::onOpenFileDlg);
+    connect(ui->videoWidget, &VideoWidget::sigPlayListStateChanged, this, [this]() {
+        if (ui->playlistWidget->isHidden())
+            ui->playlistWidget->show();
+        else
+            ui->playlistWidget->hide();
+    });
 }
 
 void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)

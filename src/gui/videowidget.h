@@ -41,6 +41,8 @@ signals:
 
     void sigOpenFileDlg();
 
+    void sigPlayListStateChanged();
+
     void sigSeekTo(int);
 
 private slots:

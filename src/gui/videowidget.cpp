@@ -50,9 +50,7 @@ SDLWidget *VideoWidget::getSDLWidget() const
 
 void VideoWidget::updateProgress(double val)
 {
-    // 进度条的范围[0, 99999]
-    // val值是百分比，需要乘以100000
-    // int iVal = val * 100000;
+    // 进度条的范围是当前播放视频的总时长[ms]
     ui->videoSlider->setValue(val);
 }
 
@@ -156,6 +154,7 @@ void VideoWidget::initConnect()
     connect(ui->previousBtn, &QPushButton::clicked, this, &VideoWidget::onPreviousBtnClicked);
     connect(ui->nextBtn, &QPushButton::clicked, this, &VideoWidget::onNextBtnClicked);
     connect(ui->openBtn, &QPushButton::clicked, this, &VideoWidget::sigOpenFileDlg);
+    connect(ui->playlistBtn, &QPushButton::clicked, this, &VideoWidget::sigPlayListStateChanged);
 
     connect(ui->videoSlider, &ClickMovableSlider::sigSeekTo, this, &VideoWidget::sigSeekTo);
 }
