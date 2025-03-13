@@ -4,6 +4,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 
+#include <QImage>
 #include <QWidget>
 
 extern "C" {
@@ -34,6 +35,8 @@ private:
     SDL_Texture  *m_texture{nullptr};
     int           m_textureWidth{0};  // 当前纹理宽度
     int           m_textureHeight{0}; // 当前纹理高度
+
+    QImage m_backimg;
 };
 
 #endif // SDLWIDGET_H

@@ -1,5 +1,7 @@
 #include "sdlwidget.h"
+#include "appcontext.h"
 
+#include <SDL_image.h>
 #include <SDL_render.h>
 #include <QDebug>
 #include <QPainter>
@@ -9,6 +11,7 @@ SDLWidget::SDLWidget(QWidget *parent)
 {
     setAttribute(Qt::WA_NativeWindow);
     setAttribute(Qt::WA_OpaquePaintEvent);
+    m_backimg.load(":/resources/backimage.png");
 }
 
 SDLWidget::~SDLWidget()
@@ -59,7 +62,7 @@ bool SDLWidget::initializeSDL()
 
 void SDLWidget::renderFrame(AVFrame *frame)
 {
-    if (!frame || !m_sdlRenderer)
+    if (!frame && !m_sdlRenderer)
         return;
 
     // 如果尺寸变化或还未创建纹理，则创建新的纹理
@@ -131,20 +134,26 @@ void SDLWidget::paintEvent(QPaintEvent *event)
     Q_UNUSED(event);
 
     // 如果没有SDL渲染器，则使用Qt的绘制方法绘制黑色背景
-    if (!m_sdlRenderer) {
+    if (AppContext::instance()->isStopped()) {
         QPainter painter(this);
         painter.fillRect(rect(), Qt::black);
+
+        // 计算图片绘制位置，使其居中
+        QSize imgSize = m_backimg.size();
+        QSize widgetSize = size();
+        int   x = (widgetSize.width() - imgSize.width()) / 2;
+        int   y = (widgetSize.height() - imgSize.height()) / 2;
+
+        // 绘制图片，保持原始大小
+        painter.drawImage(QPoint(x, y), m_backimg);
     }
-    // 如果有SDL渲染器，则不需要做额外处理，因为SDL已经处理了渲染
 }
 
 void SDLWidget::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-    // 当窗口大小改变时，不需要重新创建SDL窗口或渲染器
-    // 因为SDL_Window是从QWidget的窗口句柄创建的，会自动处理大小变化
-    // 在下一次renderFrame时会根据新尺寸调整显示矩形
+    update();
 }
 
 void SDLWidget::reset()
