@@ -1,7 +1,6 @@
 #include "sdlwidget.h"
 #include "appcontext.h"
 
-#include <SDL_image.h>
 #include <SDL_render.h>
 #include <QDebug>
 #include <QPainter>

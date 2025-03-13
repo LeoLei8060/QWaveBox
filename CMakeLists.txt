@@ -28,8 +28,14 @@ endif()
 
 # 查找SDL2包
 find_package(SDL2 REQUIRED)
-if(SDL2_image_FOUND)
-    include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
+if(SDL2_FOUND)
+    include_directories(${SDL2_INCLUDE_DIRS})
+endif()
+
+# 查找SDL2_Image包
+find_package(SDL2_image REQUIRED)
+if(SDL2_FOUND)
+    include_directories(${SDL2_INCLUDE_DIRS})
 endif()
 
 set(GUI_SOURCE_DIR src/gui)
@@ -148,9 +154,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${GUI_SOURCE_DIR}
     ${UTILS_SOURCE_DIR}
     ${CORE_SOURCE_DIR}
-    ${SDL2_INCLUDE_DIRS}
     ${PLAY_SOURCE_DIR}
-    ${FFMPEG_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIRS}
+    ${SDL2_IMAGE_INCLUDE_DIRS}
+    ${FFMPEG_INCLUDE_DIRS}
 )
 
 # 链接库
@@ -162,6 +169,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt5::MultimediaWidgets
     ${SDL2_LIBRARIES}
     ${FFMPEG_LIBRARIES}
+    ${SDL2_IMAGE_LIBRARY}
 )
 
 # 为Windows设置安装规则
