@@ -44,6 +44,9 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
+     </property>
      <widget class="VideoWidget" name="videoWidget" native="true"/>
      <widget class="PlaylistWidget" name="playlistWidget" native="true"/>
     </widget>
