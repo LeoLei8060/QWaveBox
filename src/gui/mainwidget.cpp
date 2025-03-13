@@ -352,6 +352,7 @@ void MainWidget::setupVideoWidget()
             m_threadManager->resumePlay();
     });
     connect(ui->videoWidget, &VideoWidget::sigSeekTo, this, &MainWidget::onSeekTo);
+    connect(ui->videoWidget, &VideoWidget::sigOpenFileDlg, this, &MainWidget::onOpenFileDlg);
 }
 
 void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)

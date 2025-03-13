@@ -39,6 +39,8 @@ signals:
     void sigPausePlay();
     void sigStopPlay();
 
+    void sigOpenFileDlg();
+
     void sigSeekTo(int);
 
 private slots:

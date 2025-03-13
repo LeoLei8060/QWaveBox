@@ -141,6 +141,7 @@ void VideoWidget::initConnect()
     });
     connect(ui->previousBtn, &QPushButton::clicked, this, &VideoWidget::onPreviousBtnClicked);
     connect(ui->nextBtn, &QPushButton::clicked, this, &VideoWidget::onNextBtnClicked);
+    connect(ui->openBtn, &QPushButton::clicked, this, &VideoWidget::sigOpenFileDlg);
 
     connect(ui->videoSlider, &ClickMovableSlider::sigSeekTo, this, &VideoWidget::sigSeekTo);
 }
