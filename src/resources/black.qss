@@ -147,6 +147,9 @@ QSlider::handle:horizontal {
     background-color: #444444;
 }
 
+#voiceBtn:checked {
+    color: #FAE100;
+}
 
 #AddPlaylistBtn {
     background: transparent;

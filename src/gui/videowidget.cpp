@@ -12,7 +12,7 @@
 #define NEXT_BTN_TEXT     QChar(0xe617)
 #define PLAYLIST_BTN_TEXT QChar(0xe602)
 #define VOICE_BTN_TEXT    QChar(0xea11)
-#define MUTE_BTN_TEXT     QChar(0xe611)
+#define MUTE_BTN_TEXT     QChar(0xe61E)
 #define OPEN_BTN_TEXT     QChar(0xe6d3)
 
 // 快进/快退的时间跨度：10秒
@@ -78,10 +78,13 @@ void VideoWidget::updateUIForStateChanged()
         ui->playBtn->setText(PLAY_BTN_TEXT);
     }
 
-    if (AppContext::instance()->isMute())
+    if (AppContext::instance()->isMute()) {
         ui->voiceBtn->setText(MUTE_BTN_TEXT);
-    else
+        ui->voiceBtn->setChecked(true);
+    } else {
         ui->voiceBtn->setText(VOICE_BTN_TEXT);
+        ui->voiceBtn->setChecked(false);
+    }
 }
 
 void VideoWidget::onPreviousBtnClicked()
@@ -131,6 +134,8 @@ void VideoWidget::setupVideoWidget()
 void VideoWidget::initConnect()
 {
     connect(ui->voiceSlider, &QSlider::valueChanged, this, [this](int volume) {
+        if (volume == m_volume)
+            return;
         m_volume = volume;
         emit sigVolumeChanged(m_volume);
     });
