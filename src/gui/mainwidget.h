@@ -65,6 +65,9 @@ private slots:
     // 播放进度跳转
     void onSeekTo(int position);
 
+    // 定时刷新UI
+    void onTimedRefreshUI();
+
 private:
     // 初始化函数
     void connectTitleBarSignals();
@@ -89,7 +92,7 @@ private:
 
     std::unique_ptr<ThreadManager> m_threadManager;
 
-    QTimer  m_timer;
+    QTimer  m_refreshTimer;
     int64_t m_testTime{0};
 };
 

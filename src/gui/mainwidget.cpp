@@ -49,6 +49,10 @@ MainWidget::MainWidget(QWidget *parent)
     // 连接TitleBar信号
     connectTitleBarSignals();
 
+    // 刷新UI的定时器
+    m_refreshTimer.setInterval(200);
+    connect(&m_refreshTimer, &QTimer::timeout, this, &MainWidget::onTimedRefreshUI);
+
     resize(800, 600);
 
     // Center window on screen
@@ -346,10 +350,11 @@ void MainWidget::setupVideoWidget()
         m_threadManager->stopPlay();
     });
     connect(ui->videoWidget, &VideoWidget::sigStartPlay, this, [this]() {
-        if (m_threadManager->isPlaying())
+        if (m_threadManager->isPlaying()) {
             m_threadManager->pausePlay();
-        else
+        } else {
             m_threadManager->resumePlay();
+        }
     });
     connect(ui->videoWidget, &VideoWidget::sigSeekTo, this, &MainWidget::onSeekTo);
     connect(ui->videoWidget, &VideoWidget::sigOpenFileDlg, this, &MainWidget::onOpenFileDlg);
@@ -378,19 +383,6 @@ void MainWidget::onOpenFile(const QString &filePath)
 
         auto ms = m_threadManager->getDemuxThread()->getDuration();
         ui->videoWidget->updateTotalDurationStr(ms);
-
-        // 定时器更新UI
-        m_timer.setInterval(500);
-        connect(&m_timer, &QTimer::timeout, this, [this]() {
-            // 进度条更新
-            double progress = m_threadManager->getCurrentPlayProgress();
-            ui->videoWidget->updateProgress(progress);
-
-            // 时间更新
-            QString str = millisecondToString(m_threadManager->getPlayDuration());
-            ui->videoWidget->updateCurrentDurationStr(str);
-        });
-        m_timer.start();
     }
 }
 
@@ -398,6 +390,10 @@ void MainWidget::onPlayStateChanged(PlayState state)
 {
     AppContext::instance()->setPlayState(state);
     ui->videoWidget->updateUIForStateChanged();
+    if (state == PlayState::PlayingState)
+        m_refreshTimer.start();
+    else
+        m_refreshTimer.stop();
 }
 
 void MainWidget::onVoiceStateChanged(VoiceState state)
@@ -411,6 +407,17 @@ void MainWidget::onSeekTo(int position)
     // position = 当前视频位置（ms）
     qDebug() << __FUNCTION__ << position;
     m_threadManager->seekToPosition(position);
+}
+
+void MainWidget::onTimedRefreshUI()
+{
+    // 进度条更新
+    double progress = m_threadManager->getCurrentPlayProgress();
+    ui->videoWidget->updateProgress(progress);
+
+    // 时间更新
+    QString str = millisecondToString(m_threadManager->getPlayDuration());
+    ui->videoWidget->updateCurrentDurationStr(str);
 }
 
 void MainWidget::onOpenFileDlg()
