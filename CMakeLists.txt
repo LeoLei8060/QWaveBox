@@ -52,6 +52,8 @@ set(GUI_SOURCES
     src/gui/filelistmodel.cpp
     src/gui/filelistview.cpp
     src/gui/clickmovableslider.cpp
+    src/gui/playlistmodel.cpp
+    src/gui/playlistview.cpp
 )
 set(GUI_HEADERS
     src/gui/titlebar.h
@@ -62,6 +64,8 @@ set(GUI_HEADERS
     src/gui/filelistmodel.h
     src/gui/filelistview.h
     src/gui/clickmovableslider.h
+    src/gui/playlistmodel.h
+    src/gui/playlistview.h
 )
 set(GUI_FORMS
     src/gui/titlebar.ui
