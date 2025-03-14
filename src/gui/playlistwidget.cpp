@@ -1,4 +1,5 @@
 #include "playlistwidget.h"
+#include "playlistmodel.h"
 #include "ui_playlistwidget.h"
 
 PlaylistWidget::PlaylistWidget(QWidget *parent)
@@ -9,12 +10,18 @@ PlaylistWidget::PlaylistWidget(QWidget *parent)
     ui->tabWidget->setAttribute(Qt::WA_StyledBackground);
 
     setupTabWidget();
+    setupDefaultList();
     setupComputerList();
 }
 
 PlaylistWidget::~PlaylistWidget()
 {
     delete ui;
+}
+
+void PlaylistWidget::addFileToDefaultList(const QString &file)
+{
+    ui->listView_def->addItem(file);
 }
 
 void PlaylistWidget::setupTabWidget()
@@ -26,6 +33,12 @@ void PlaylistWidget::setupTabWidget()
     m_addTabBtn = new QPushButton("+ 新建专辑", this);
     m_addTabBtn->setObjectName("AddPlaylistBtn");
     ui->tabWidget->setCornerWidget(m_addTabBtn, Qt::Corner::TopLeftCorner);
+}
+
+void PlaylistWidget::setupDefaultList()
+{
+    m_defaultModel = new PlayListModel(this);
+    ui->listView_def->setModel(m_defaultModel);
 }
 
 void PlaylistWidget::setupComputerList()

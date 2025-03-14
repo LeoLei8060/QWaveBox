@@ -374,7 +374,7 @@ void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void MainWidget::onOpenFile(const QString &filePath)
+bool MainWidget::onOpenFile(const QString &filePath)
 {
     if (AppContext::instance()->isPlaying())
         m_threadManager->stopPlay();
@@ -384,12 +384,14 @@ void MainWidget::onOpenFile(const QString &filePath)
 
         if (!m_threadManager->startAllThreads()) {
             qWarning() << "线程启动失败...";
-            return;
+            return false;
         }
 
         auto ms = m_threadManager->getDemuxThread()->getDuration();
         ui->videoWidget->updateTotalDurationStr(ms);
+        return true;
     }
+    return false;
 }
 
 void MainWidget::onPlayStateChanged(PlayState state)
@@ -435,7 +437,9 @@ void MainWidget::onOpenFileDlg()
         // QString(),
         tr("媒体文件 (*.mp3 *.mp4 *.avi *.mkv *.wav *.flac);;所有文件 (*.*)"));
 
-    onOpenFile(filePath);
+    if (onOpenFile(filePath)) {
+        ui->playlistWidget->addFileToDefaultList(filePath);
+    }
 }
 
 void MainWidget::onOpenFolder()

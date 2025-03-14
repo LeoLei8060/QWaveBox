@@ -55,7 +55,7 @@ private slots:
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
     // 打开视频文件
-    void onOpenFile(const QString &filePath);
+    bool onOpenFile(const QString &filePath);
 
     // 更新播放状态
     void onPlayStateChanged(PlayState state);
