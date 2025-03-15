@@ -30,13 +30,13 @@ int main(int argc, char *argv[])
     w.show();
 
     // 如果命令行中指定了文件，则打开该文件
-    // const QStringList args = parser.positionalArguments();
-    // if (!args.isEmpty()) {
-    //     const QString fileName = args.first();
-    //     if (QFileInfo::exists(fileName)) {
-    //         w.openFile(fileName);
-    //     }
-    // }
+    const QStringList args = parser.positionalArguments();
+    if (!args.isEmpty()) {
+        const QString fileName = args.first();
+        if (QFileInfo::exists(fileName)) {
+            w.onOpenFile(fileName);
+        }
+    }
 
     return a.exec();
 }

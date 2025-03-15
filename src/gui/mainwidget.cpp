@@ -392,6 +392,7 @@ bool MainWidget::onOpenFile(const QString &filePath)
 
         auto ms = m_threadManager->getDemuxThread()->getDuration();
         ui->videoWidget->updateTotalDurationStr(ms);
+        ui->playlistWidget->addFileToDefaultList(filePath);
         return true;
     }
     return false;
@@ -440,8 +441,8 @@ void MainWidget::onOpenFileDlg()
         // QString(),
         tr("媒体文件 (*.mp3 *.mp4 *.avi *.mkv *.wav *.flac);;所有文件 (*.*)"));
 
-    if (onOpenFile(filePath)) {
-        ui->playlistWidget->addFileToDefaultList(filePath);
+    if (!onOpenFile(filePath)) {
+        qWarning() << "file open failed.";
     }
 }
 

@@ -35,6 +35,10 @@ public:
     explicit MainWidget(QWidget *parent = nullptr);
     ~MainWidget();
 
+public slots:
+    // 打开视频文件
+    bool onOpenFile(const QString &filePath);
+
 protected:
     void changeEvent(QEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
@@ -53,9 +57,6 @@ private slots:
 
     // 托盘图标槽函数
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
-
-    // 打开视频文件
-    bool onOpenFile(const QString &filePath);
 
     // 更新播放状态
     void onPlayStateChanged(PlayState state);
