@@ -42,6 +42,7 @@ set(GUI_SOURCE_DIR src/gui)
 set(UTILS_SOURCE_DIR src/utils)
 set(CORE_SOURCE_DIR src/core)
 set(PLAY_SOURCE_DIR src/play)
+set(THIRDPARTY_SOURCE_DIR src/3rdparty)
 
 set(GUI_SOURCES
     src/gui/titlebar.cpp
@@ -117,12 +118,25 @@ set(PLAY_HEADERS
     src/play/avsync.h
 )
 
+set(THIRD_SOURCES
+    src/3rdparty/nameof/nameof.hpp
+    src/3rdparty/obj_conv/reflex_format.hpp
+    src/3rdparty/obj_conv/rw_json.hpp
+    src/3rdparty/obj_conv/rw_traits_type.hpp
+    src/3rdparty/obj_conv/rw_xml.hpp
+    src/3rdparty/tinyxml/tinyxml2.cpp
+)
+set(THIRD_HEADERS
+    src/3rdparty/tinyxml/tinyxml2.h
+)
+
 # 项目源文件
 set(SOURCES
     ${GUI_SOURCES}
     ${UTILS_SOURCES}
     ${CORE_SOURCES}
     ${PLAY_SOURCES}
+    ${THIRD_SOURCES}
     src/main.cpp
 )
 
@@ -132,6 +146,7 @@ set(HEADERS
     ${UTILS_HEADERS}
     ${CORE_HEADERS}
     ${PLAY_HEADERS}
+    ${THIRD_HEADERS}
 )
 
 # UI文件
@@ -150,6 +165,7 @@ add_executable(${PROJECT_NAME}
     ${HEADERS}
     ${UI_FILES}
     ${RESOURCES}
+    src/core/appdata.h src/core/appdata.cpp
 )
 
 # 包含目录
@@ -162,6 +178,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${SDL2_INCLUDE_DIRS}
     ${SDL2_IMAGE_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
+    ${THIRDPARTY_SOURCE_DIR}
 )
 
 # 链接库
@@ -182,3 +199,5 @@ if(WIN32)
 else()
     install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 endif()
+
+add_subdirectory(src/3rdparty/rapidjson)
