@@ -36,7 +36,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     // 数据操作
-    void addItem(const QString &text);
+    bool addItem(const QString &text);
 
     void removeRows(const QModelIndexList &indexes);
 

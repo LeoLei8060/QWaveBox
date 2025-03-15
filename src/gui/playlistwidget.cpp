@@ -23,8 +23,8 @@ PlaylistWidget::~PlaylistWidget()
 void PlaylistWidget::addFileToDefaultList(const QString &file)
 {
     // file是文件的绝对路径
-    ui->listView_def->addItem(file);
-    AppContext::instance()->getAppData()->addPlayFileToDefAlbum(file);
+    if (ui->listView_def->addItem(file))
+        AppContext::instance()->getAppData()->addPlayFileToDefAlbum(file);
 }
 
 void PlaylistWidget::setupTabWidget()

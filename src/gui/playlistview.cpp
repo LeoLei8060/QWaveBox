@@ -9,10 +9,11 @@ PlayListView::PlayListView(QWidget *parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
-void PlayListView::addItem(const QString &text)
+bool PlayListView::addItem(const QString &text)
 {
-    if (model())
-        static_cast<PlayListModel *>(model())->addItem(text);
+    if (!model())
+        return false;
+    return static_cast<PlayListModel *>(model())->addItem(text);
 }
 
 void PlayListView::moveSelectedUp()

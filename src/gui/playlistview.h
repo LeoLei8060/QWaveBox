@@ -9,7 +9,7 @@ class PlayListView : public QListView
 public:
     explicit PlayListView(QWidget *parent = nullptr);
 
-    void addItem(const QString &text);
+    bool addItem(const QString &text);
 
     void moveSelectedUp();
     void moveSelectedDown();

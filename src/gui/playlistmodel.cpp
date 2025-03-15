@@ -24,15 +24,21 @@ QVariant PlayListModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void PlayListModel::addItem(const QString &text)
+bool PlayListModel::addItem(const QString &text)
 {
     QFileInfo info(text);
     if (!info.exists())
-        return;
+        return false;
+    // 禁止重复添加
+    for (auto &item : m_items) {
+        if (item.filePath == text)
+            return false;
+    }
 
     beginInsertRows(QModelIndex(), m_items.count(), m_items.count());
     m_items.append(PlayListItem(info));
     endInsertRows();
+    return true;
 }
 
 void PlayListModel::removeRows(const QModelIndexList &indexes)
@@ -105,31 +111,28 @@ QModelIndex PlayListModel::find(const QString &text)
 void PlayListModel::performSort()
 {
     beginResetModel();
-    std::sort(m_items.begin(),
-              m_items.end(),
-              [this](const PlayListItem &a, const PlayListItem &b) {
-                  bool lessThan = false;
-                  switch (m_sortMode) {
-                  case Name:
-                      // 修改为不区分大小写的比较
-                      lessThan = a.fileName.compare(b.fileName, Qt::CaseInsensitive) < 0;
-                      break;
-                  case Ext:
-                      // 扩展名也不区分大小写
-                      lessThan = QFileInfo(a.fileName)
-                                     .suffix()
-                                     .compare(QFileInfo(b.fileName).suffix(),
-                                              Qt::CaseInsensitive)
-                                 < 0;
-                      break;
-                  case Size:
-                      lessThan = a.size < b.size;
-                      break;
-                  case Time:
-                      lessThan = a.lastModified < b.lastModified;
-                      break;
-                  }
-                  return m_sortOrder == Ascending ? lessThan : !lessThan;
-              });
+    std::sort(m_items.begin(), m_items.end(), [this](const PlayListItem &a, const PlayListItem &b) {
+        bool lessThan = false;
+        switch (m_sortMode) {
+        case Name:
+            // 修改为不区分大小写的比较
+            lessThan = a.fileName.compare(b.fileName, Qt::CaseInsensitive) < 0;
+            break;
+        case Ext:
+            // 扩展名也不区分大小写
+            lessThan = QFileInfo(a.fileName)
+                           .suffix()
+                           .compare(QFileInfo(b.fileName).suffix(), Qt::CaseInsensitive)
+                       < 0;
+            break;
+        case Size:
+            lessThan = a.size < b.size;
+            break;
+        case Time:
+            lessThan = a.lastModified < b.lastModified;
+            break;
+        }
+        return m_sortOrder == Ascending ? lessThan : !lessThan;
+    });
     endResetModel();
 }
