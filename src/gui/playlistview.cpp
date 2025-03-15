@@ -62,7 +62,7 @@ void PlayListView::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QModelIndex index = indexAt(event->pos());
     if (index.isValid()) {
-        emit fileDoubleClicked(index.data(Qt::UserRole).toString());
+        emit sigFileDoubleClicked(index.data(Qt::UserRole).toString());
     }
     QListView::mouseDoubleClickEvent(event);
 }

@@ -17,7 +17,7 @@ public:
     void moveToBottom();
 
 signals:
-    void fileDoubleClicked(const QString &filePath);
+    void sigFileDoubleClicked(const QString &filePath);
 
 protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
