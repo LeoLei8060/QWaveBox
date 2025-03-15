@@ -5,7 +5,8 @@
 PlayListView::PlayListView(QWidget *parent)
     : QListView(parent)
 {
-    setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void PlayListView::addItem(const QString &text)
