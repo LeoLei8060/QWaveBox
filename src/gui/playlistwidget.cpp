@@ -1,4 +1,5 @@
 #include "playlistwidget.h"
+#include "appcontext.h"
 #include "playlistmodel.h"
 #include "ui_playlistwidget.h"
 
@@ -21,7 +22,9 @@ PlaylistWidget::~PlaylistWidget()
 
 void PlaylistWidget::addFileToDefaultList(const QString &file)
 {
+    // file是文件的绝对路径
     ui->listView_def->addItem(file);
+    AppContext::instance()->getAppData()->addPlayFileToDefAlbum(file);
 }
 
 void PlaylistWidget::setupTabWidget()
@@ -39,6 +42,17 @@ void PlaylistWidget::setupDefaultList()
 {
     m_defaultModel = new PlayListModel(this);
     ui->listView_def->setModel(m_defaultModel);
+
+    auto album = AppContext::instance()->getAppData()->getDefaultAlbum();
+    auto playFiles = album.getPlayfiles();
+    for (auto file : playFiles) {
+        ui->listView_def->addItem(file.filepath_);
+    }
+
+    connect(ui->listView_def,
+            &PlayListView::sigFileDoubleClicked,
+            this,
+            &PlaylistWidget::sigOpenFile);
 }
 
 void PlaylistWidget::setupComputerList()
