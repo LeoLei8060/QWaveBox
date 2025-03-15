@@ -1,6 +1,7 @@
 #ifndef APPCONTEXT_H
 #define APPCONTEXT_H
 
+#include "appdata.h"
 #include "constants.h"
 
 #include <QObject>
@@ -29,6 +30,9 @@ public:
     void             setVoiceState(const VoiceState &state) { m_voiceState = state; }
     inline bool      isMute() { return m_voiceState == VoiceState::MuteState; }
 
+    // appData
+    std::shared_ptr<AppData> getAppData() const { return m_appData; }
+
 signals:
     void sigPlayStateChanged(PlayState state);
 
@@ -36,15 +40,15 @@ private:
     PlayState  m_playState{PlayState::StoppedState};
     VoiceState m_voiceState{VoiceState::NormalState};
 
+    std::shared_ptr<AppData> m_appData;
+
 private:
     explicit AppContext(QObject *parent = nullptr);
-    ~AppContext() override = default;
+    ~AppContext();
 
     // 禁用拷贝和赋值
     AppContext(const AppContext &) = delete;
     AppContext &operator=(const AppContext &) = delete;
-
-    static AppContext *s_instance;
 };
 
 #endif // APPCONTEXT_H
