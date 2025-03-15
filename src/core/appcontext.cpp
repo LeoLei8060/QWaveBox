@@ -24,6 +24,21 @@ AppContext *AppContext::instance()
     return &instance;
 }
 
+void AppContext::setVoiceState(const VoiceState &state)
+{
+    m_appData->setMute(state == VoiceState::MuteState);
+}
+
+void AppContext::setVolume(int volume)
+{
+    m_appData->setVolume(volume);
+}
+
+bool AppContext::isMute()
+{
+    return m_appData->isMute();
+}
+
 AppContext::AppContext(QObject *parent)
     : QObject(parent)
     , m_appData(std::make_shared<AppData>())

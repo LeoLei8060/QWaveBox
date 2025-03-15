@@ -343,8 +343,11 @@ void MainWidget::setupPlayListWidget()
 
 void MainWidget::setupVideoWidget()
 {
+    ui->videoWidget->setVolume(AppContext::instance()->getAppData()->getVolume());
+
     connect(ui->videoWidget, &VideoWidget::sigVolumeChanged, this, [this](int volume) {
         m_threadManager->setVolume(volume);
+        AppContext::instance()->setVolume(volume);
     });
     connect(ui->videoWidget, &VideoWidget::sigStopPlay, this, [this]() {
         m_threadManager->stopPlay();

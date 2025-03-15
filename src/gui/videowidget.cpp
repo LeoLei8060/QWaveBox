@@ -94,6 +94,11 @@ void VideoWidget::updateUIForStateChanged()
     }
 }
 
+void VideoWidget::setVolume(int volume)
+{
+    ui->voiceSlider->setValue(volume);
+}
+
 void VideoWidget::onPreviousBtnClicked()
 {
     int  span = -TIMESPAN;

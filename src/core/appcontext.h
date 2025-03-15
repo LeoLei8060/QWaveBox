@@ -26,9 +26,9 @@ public:
     inline bool     isStopped() { return m_playState == PlayState::StoppedState; }
 
     // 声音控制
-    const VoiceState getVoiceState() const { return m_voiceState; }
-    void             setVoiceState(const VoiceState &state) { m_voiceState = state; }
-    inline bool      isMute() { return m_voiceState == VoiceState::MuteState; }
+    void setVoiceState(const VoiceState &state);
+    void setVolume(int volume);
+    bool isMute();
 
     // appData
     std::shared_ptr<AppData> getAppData() const { return m_appData; }
@@ -37,8 +37,7 @@ signals:
     void sigPlayStateChanged(PlayState state);
 
 private:
-    PlayState  m_playState{PlayState::StoppedState};
-    VoiceState m_voiceState{VoiceState::NormalState};
+    PlayState m_playState{PlayState::StoppedState};
 
     std::shared_ptr<AppData> m_appData;
 

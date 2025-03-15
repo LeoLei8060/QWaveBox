@@ -1,4 +1,5 @@
 #include "threadmanager.h"
+#include "appcontext.h"
 #include "audiodecodethread.h"
 #include "audiorenderthread.h"
 #include "demuxthread.h"
@@ -29,6 +30,10 @@ bool ThreadManager::openMedia(const QString &path)
         qWarning() << "openMedia failed.";
         return false;
     }
+    // 更新音量
+    auto aRenderThd = getAudioRenderThread();
+    aRenderThd->setVolume(AppContext::instance()->getAppData()->getVolume());
+
     bRet = resetThreadLinkage();
     return bRet;
 }
@@ -73,6 +78,7 @@ void ThreadManager::resumePlay()
     auto aRenderThd = getAudioRenderThread();
     if (!aRenderThd)
         return;
+    aRenderThd->setVolume(AppContext::instance()->getAppData()->getVolume());
     aRenderThd->resumePlay();
 }
 

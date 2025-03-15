@@ -32,6 +32,8 @@ public:
 
     void updateUIForStateChanged();
 
+    void setVolume(int volume);
+
 signals:
     void sigVolumeChanged(int volume);
 
