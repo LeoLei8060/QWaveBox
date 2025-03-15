@@ -38,9 +38,10 @@ public:
     AppData();
 
     QString getDefaultAlbumName() { return m_defaultAlbum.getAlbumName(); }
-    Album   getDefaultList() const { return m_defaultAlbum; }
+    Album   getDefaultAlbum() const { return m_defaultAlbum; }
     void    addPlayFileToDefAlbum(const PlayFile &file);
     void    deletePlayFileFromDefAlbum(const QString &filename);
+    void    addPlayFileToDefAlbum(const QString &filepath);
 
     QList<Album> getCustomAlbums() const { return m_customAlbums; }
     void         addCustomAlbum(const QString &albumName);

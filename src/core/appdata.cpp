@@ -1,4 +1,5 @@
 #include "appdata.h"
+#include <QFileInfo>
 
 AppData::AppData() {}
 
@@ -10,6 +11,14 @@ void AppData::addPlayFileToDefAlbum(const PlayFile &file)
 void AppData::deletePlayFileFromDefAlbum(const QString &filename)
 {
     m_defaultAlbum.deletePlayFile(filename);
+}
+
+void AppData::addPlayFileToDefAlbum(const QString &filepath)
+{
+    QFileInfo info(filepath);
+    if (info.isFile()) {
+        m_defaultAlbum.addPlayFile({info.fileName(), filepath});
+    }
 }
 
 void AppData::addCustomAlbum(const QString &albumName)
