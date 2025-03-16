@@ -359,7 +359,7 @@ void MainWidget::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
 
 bool MainWidget::onOpenFile(const QString &filePath)
 {
-    if (AppContext::instance()->isPlaying())
+    if (AppContext::instance()->isPlaying() || AppContext::instance()->isPauseed())
         m_threadManager->stopPlay();
     if (!filePath.isEmpty()) {
         qDebug() << "Opening file:" << filePath;
