@@ -22,7 +22,7 @@ Application::~Application() {}
 
 bool Application::initialize()
 {
-    initializeHotkey();
+    // initializeHotkey();
     if (initializeIcon() && initializeIconFont() && initializeStyle())
         return true;
     return false;
@@ -63,6 +63,7 @@ bool Application::initializeStyle()
 
 bool Application::initializeHotkey()
 {
+    // NOTE: ShortcutManager管理的是全局快捷键，这里暂时用不到
     static QMap<int, QString> hotkeys = {{K_OpenFile, "F3"},
                                          {K_OpenFolder, "F2"},
                                          {K_Close, "F4"},

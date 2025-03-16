@@ -14,6 +14,8 @@ namespace Ui {
 class MainWidget;
 }
 
+class QShortcut;
+
 class MainWidget : public QWidget
 {
     Q_OBJECT
@@ -55,8 +57,6 @@ private slots:
     void onAbout();
     void onQuitApplication();
 
-    void onHotkeyTriggered(int id);
-
     void onPlayTriggered();
 
     // 托盘图标槽函数
@@ -76,7 +76,6 @@ private slots:
 private:
     // 初始化函数
     void setupHotkeys();
-    void connectTitleBarSignals();
     void setupPlayListWidget();
     void setupVideoWidget();
     void setupMenu();
@@ -95,6 +94,12 @@ private:
     QMenu           *m_menu;
     QSystemTrayIcon *m_trayIcon;
     QMenu           *m_trayMenu;
+
+    QShortcut *m_key_playSelected;
+    QShortcut *m_key_pausePlay;
+    QShortcut *m_key_nextPlay;
+    QShortcut *m_key_prevPlay;
+    QShortcut *m_key_fullScreen;
 
     std::unique_ptr<ThreadManager> m_threadManager;
 

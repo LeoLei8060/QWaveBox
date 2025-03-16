@@ -48,9 +48,6 @@ MainWidget::MainWidget(QWidget *parent)
     setupMenu();
     setupTrayIcon();
 
-    // 连接TitleBar信号
-    connectTitleBarSignals();
-
     // 刷新UI的定时器
     m_refreshTimer.setInterval(200);
     connect(&m_refreshTimer, &QTimer::timeout, this, &MainWidget::onTimedRefreshUI);
@@ -229,11 +226,17 @@ void MainWidget::setupMenu()
 
     // 创建菜单项
     QAction *openFileAction = new QAction(tr("打开文件(F3)"), this);
+    openFileAction->setShortcut(QKeySequence(Qt::Key_F3));
     QAction *openFolderAction = new QAction(tr("打开文件夹(F2)"), this);
+    openFolderAction->setShortcut(QKeySequence("F2"));
     QAction *closeAction = new QAction(tr("关闭(F4)"), this);
+    closeAction->setShortcut(QKeySequence("F4"));
     QAction *optionsAction = new QAction(tr("选项(F5)"), this);
-    QAction *aboutAction = new QAction(tr("关于(F1)"), this);
+    optionsAction->setShortcut(QKeySequence("F5"));
+    QAction *aboutAction = new QAction(tr("关于(F12)"), this);
+    aboutAction->setShortcut(QKeySequence("F12"));
     QAction *quitAction = new QAction(tr("退出(Ctrl+F4)"), this);
+    quitAction->setShortcut(QKeySequence("Ctrl+F4"));
 
     // 添加菜单项到菜单
     m_menu->addAction(openFileAction);
@@ -319,25 +322,6 @@ void MainWidget::setupThreadManager()
             &MainWidget::onVoiceStateChanged);
 }
 
-void MainWidget::connectTitleBarSignals()
-{
-    if (ui->titlebar) {
-        TitleBar *titleBar = qobject_cast<TitleBar *>(ui->titlebar);
-        if (titleBar) {
-            // 连接信号和槽
-            connect(titleBar, &TitleBar::openFileRequested, this, &MainWidget::onOpenFileDlg);
-            connect(titleBar, &TitleBar::openFolderRequested, this, &MainWidget::onOpenFolder);
-            connect(titleBar, &TitleBar::closeToTrayRequested, this, &MainWidget::onCloseToTray);
-            connect(titleBar, &TitleBar::optionsRequested, this, &MainWidget::onOptions);
-            connect(titleBar, &TitleBar::aboutRequested, this, &MainWidget::onAbout);
-            connect(titleBar,
-                    &TitleBar::quitApplicationRequested,
-                    this,
-                    &MainWidget::onQuitApplication);
-        }
-    }
-}
-
 void MainWidget::setupPlayListWidget()
 {
     connect(ui->playlistWidget, &PlaylistWidget::sigOpenFile, this, &MainWidget::onOpenFile);
@@ -413,8 +397,8 @@ void MainWidget::onVoiceStateChanged(VoiceState state)
 void MainWidget::onSeekTo(int position)
 {
     // position = 当前视频位置（ms）
-    qDebug() << __FUNCTION__ << position;
-    m_threadManager->seekToPosition(position);
+    if (m_threadManager->isPlaying())
+        m_threadManager->seekToPosition(position);
 }
 
 void MainWidget::onTimedRefreshUI()
@@ -430,10 +414,28 @@ void MainWidget::onTimedRefreshUI()
 
 void MainWidget::setupHotkeys()
 {
-    connect(ShortcutManager::instance(),
-            &ShortcutManager::sigHotkeyTriggered,
-            this,
-            &MainWidget::onHotkeyTriggered);
+    m_key_playSelected = new QShortcut(QKeySequence(Qt::Key_Return), this);
+    connect(m_key_playSelected, &QShortcut::activated, this, [this]() {
+        ui->playlistWidget->playSelected();
+    });
+
+    m_key_pausePlay = new QShortcut(Qt::Key_Space, this);
+    connect(m_key_pausePlay, &QShortcut::activated, this, &MainWidget::onPlayTriggered);
+
+    m_key_nextPlay = new QShortcut(Qt::Key_Right, this);
+    connect(m_key_nextPlay, &QShortcut::activated, this, [this]() {
+        ui->videoWidget->onNextBtnClicked();
+    });
+
+    m_key_prevPlay = new QShortcut(Qt::Key_Left, this);
+    connect(m_key_prevPlay, &QShortcut::activated, this, [this]() {
+        ui->videoWidget->onPreviousBtnClicked();
+    });
+
+    m_key_fullScreen = new QShortcut(Qt::Key_F11, this);
+    connect(m_key_fullScreen, &QShortcut::activated, this, [this]() {
+        ui->titlebar->onFullscreenButtonClicked();
+    });
 }
 
 void MainWidget::onOpenFileDlg()
@@ -445,7 +447,7 @@ void MainWidget::onOpenFileDlg()
         // QString(),
         tr("媒体文件 (*.mp3 *.mp4 *.avi *.mkv *.wav *.flac);;所有文件 (*.*)"));
 
-    if (!onOpenFile(filePath)) {
+    if (!filePath.isEmpty() && !onOpenFile(filePath)) {
         qWarning() << "file open failed.";
     }
 }
@@ -499,45 +501,6 @@ void MainWidget::onQuitApplication()
     // 退出应用程序
     m_threadManager->stopPlay();
     QApplication::quit();
-}
-
-void MainWidget::onHotkeyTriggered(int id)
-{
-    HotkeyType type = (HotkeyType) id;
-    switch (type) {
-    case K_OpenFile:
-        onOpenFileDlg();
-        break;
-    case K_OpenFolder:
-        onOpenFolder();
-        break;
-    case K_Close:
-        onCloseToTray();
-        break;
-    case K_Options:
-        onOptions();
-        break;
-    case K_About:
-        onAbout();
-        break;
-    case K_Quit:
-        onQuitApplication();
-        break;
-    case K_PlaySelected:
-        ui->playlistWidget->playSelected();
-        break;
-    case K_PausePlay:
-        onPlayTriggered();
-        break;
-    case K_NextPlay:
-        ui->videoWidget->onNextBtnClicked();
-        break;
-    case K_PrevPlay:
-        ui->videoWidget->onPreviousBtnClicked();
-        break;
-    default:
-        break;
-    }
 }
 
 void MainWidget::onPlayTriggered()

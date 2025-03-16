@@ -1,12 +1,12 @@
 #ifndef TITLEBAR_H
 #define TITLEBAR_H
 
-#include <QWidget>
-#include <QMouseEvent>
+#include <QAction>
 #include <QFont>
 #include <QMenu>
-#include <QAction>
+#include <QMouseEvent>
 #include <QShortcut>
+#include <QWidget>
 
 namespace Ui {
 class TitleBar;
@@ -19,9 +19,12 @@ class TitleBar : public QWidget
 public:
     explicit TitleBar(QWidget *parent = nullptr);
     ~TitleBar();
-    
+
     // 提供设置菜单的公共方法
     void setMenu(QMenu *menu);
+
+public slots:
+    void onFullscreenButtonClicked();
 
 signals:
     void openFileRequested();
@@ -40,23 +43,22 @@ private slots:
     void onPinButtonClicked();
     void onMinimizeButtonClicked();
     void onMaximizeButtonClicked();
-    void onFullscreenButtonClicked();
     void onCloseButtonClicked();
 
 private:
     void setupButtons();
     void updateButtonStates();
-    void setupGlobalShortcuts();
+    // void setupGlobalShortcuts();
 
 private:
     Ui::TitleBar *ui;
-    QPoint m_dragPosition;
-    bool m_isPressed = false;
-    bool m_isPinned = false;
-    bool m_isMaximized = false;
-    bool m_isFullscreen = false;
-    QFont m_iconFont;
-    
+    QPoint        m_dragPosition;
+    bool          m_isPressed = false;
+    bool          m_isPinned = false;
+    bool          m_isMaximized = false;
+    bool          m_isFullscreen = false;
+    QFont         m_iconFont;
+
     // 只保留快捷键，菜单将由主窗口提供
     QShortcut *m_openFileShortcut;
     QShortcut *m_openFolderShortcut;

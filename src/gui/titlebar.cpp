@@ -19,7 +19,7 @@ TitleBar::TitleBar(QWidget *parent)
     m_iconFont.setPixelSize(16);
 
     setupButtons();
-    setupGlobalShortcuts();
+    // setupGlobalShortcuts();
 
     // Connect button signals
     connect(ui->pushButton, &QPushButton::clicked, this, &TitleBar::onPinButtonClicked);
@@ -111,24 +111,24 @@ void TitleBar::setupButtons()
     ui->pushButton_5->setText(QChar(0xe60f)); // Close icon
 }
 
-void TitleBar::setupGlobalShortcuts()
-{
-    // 创建全局快捷键
-    m_openFileShortcut = new QShortcut(QKeySequence(Qt::Key_F3), this);
-    m_openFolderShortcut = new QShortcut(QKeySequence(Qt::Key_F2), this);
-    m_closeToTrayShortcut = new QShortcut(QKeySequence(Qt::Key_F4), this);
-    m_optionsShortcut = new QShortcut(QKeySequence(Qt::Key_F5), this);
-    m_aboutShortcut = new QShortcut(QKeySequence(Qt::Key_F1), this);
-    m_quitShortcut = new QShortcut(QKeySequence(Qt::ALT + Qt::Key_F4), this);
+// void TitleBar::setupGlobalShortcuts()
+// {
+//     // 创建全局快捷键
+//     m_openFileShortcut = new QShortcut(QKeySequence(Qt::Key_F3), this);
+//     m_openFolderShortcut = new QShortcut(QKeySequence(Qt::Key_F2), this);
+//     m_closeToTrayShortcut = new QShortcut(QKeySequence(Qt::Key_F4), this);
+//     m_optionsShortcut = new QShortcut(QKeySequence(Qt::Key_F5), this);
+//     m_aboutShortcut = new QShortcut(QKeySequence(Qt::Key_F1), this);
+//     m_quitShortcut = new QShortcut(QKeySequence(Qt::ALT + Qt::Key_F4), this);
 
-    // 连接快捷键信号和槽
-    connect(m_openFileShortcut, &QShortcut::activated, this, &TitleBar::openFileRequested);
-    connect(m_openFolderShortcut, &QShortcut::activated, this, &TitleBar::openFolderRequested);
-    connect(m_closeToTrayShortcut, &QShortcut::activated, this, &TitleBar::closeToTrayRequested);
-    connect(m_optionsShortcut, &QShortcut::activated, this, &TitleBar::optionsRequested);
-    connect(m_aboutShortcut, &QShortcut::activated, this, &TitleBar::aboutRequested);
-    connect(m_quitShortcut, &QShortcut::activated, this, &TitleBar::quitApplicationRequested);
-}
+//     // 连接快捷键信号和槽
+//     connect(m_openFileShortcut, &QShortcut::activated, this, &TitleBar::openFileRequested);
+//     connect(m_openFolderShortcut, &QShortcut::activated, this, &TitleBar::openFolderRequested);
+//     connect(m_closeToTrayShortcut, &QShortcut::activated, this, &TitleBar::closeToTrayRequested);
+//     connect(m_optionsShortcut, &QShortcut::activated, this, &TitleBar::optionsRequested);
+//     connect(m_aboutShortcut, &QShortcut::activated, this, &TitleBar::aboutRequested);
+//     connect(m_quitShortcut, &QShortcut::activated, this, &TitleBar::quitApplicationRequested);
+// }
 
 void TitleBar::updateButtonStates()
 {
