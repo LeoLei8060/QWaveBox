@@ -30,6 +30,17 @@ QString FileListView::currentDirectory() const
     return m_model->currentDirectory();
 }
 
+QString FileListView::getSelectedPath()
+{
+    QModelIndexList indexes = selectionModel()->selectedIndexes();
+    for (auto &index : indexes) {
+        if (index.isValid() && !m_model->isDirectory(index)) {
+            return m_model->filePath(index);
+        }
+    }
+    return "";
+}
+
 void FileListView::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QListView::mouseDoubleClickEvent(event);

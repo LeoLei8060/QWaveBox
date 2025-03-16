@@ -9,6 +9,19 @@ PlayListView::PlayListView(QWidget *parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
+QString PlayListView::getSelectedPath()
+{
+    if (!selectionMode())
+        return "";
+    QModelIndexList indexes = selectionModel()->selectedIndexes();
+    for (auto &index : indexes) {
+        if (index.isValid()) {
+            return index.data(Qt::UserRole).toString();
+        }
+    }
+    return "";
+}
+
 bool PlayListView::addItem(const QString &text)
 {
     if (!model())

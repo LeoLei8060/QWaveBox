@@ -14,6 +14,8 @@ public:
     void    setDirectory(const QString &path);
     QString currentDirectory() const;
 
+    QString getSelectedPath();
+
 signals:
     void sigDirectoryChanged(const QString &path);
     void sigFileSelected(const QString &filePath);

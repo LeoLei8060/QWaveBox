@@ -20,6 +20,9 @@ public:
 
     void addFileToDefaultList(const QString &file);
 
+    // 播放选中项（提供给快捷键使用）
+    void playSelected();
+
 signals:
     void sigOpenFile(const QString &);
 

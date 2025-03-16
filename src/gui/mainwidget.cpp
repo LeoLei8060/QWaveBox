@@ -6,6 +6,7 @@
 #include "demuxthread.h"
 #include "renderthread.h"
 #include "sdlwidget.h"
+#include "shortcutmanager.h"
 #include "titlebar.h"
 #include "ui_mainwidget.h"
 #include "videodecodethread.h"
@@ -40,6 +41,7 @@ MainWidget::MainWidget(QWidget *parent)
     ui->playlistWidget->setCursor(Qt::ArrowCursor);
     ui->videoWidget->setCursor(Qt::ArrowCursor);
 
+    setupHotkeys();
     setupPlayListWidget();
     setupVideoWidget();
     // 初始化菜单和托盘
@@ -352,13 +354,7 @@ void MainWidget::setupVideoWidget()
     connect(ui->videoWidget, &VideoWidget::sigStopPlay, this, [this]() {
         m_threadManager->stopPlay();
     });
-    connect(ui->videoWidget, &VideoWidget::sigStartPlay, this, [this]() {
-        if (m_threadManager->isPlaying()) {
-            m_threadManager->pausePlay();
-        } else {
-            m_threadManager->resumePlay();
-        }
-    });
+    connect(ui->videoWidget, &VideoWidget::sigStartPlay, this, &MainWidget::onPlayTriggered);
     connect(ui->videoWidget, &VideoWidget::sigSeekTo, this, &MainWidget::onSeekTo);
     connect(ui->videoWidget, &VideoWidget::sigOpenFileDlg, this, &MainWidget::onOpenFileDlg);
     connect(ui->videoWidget, &VideoWidget::sigPlayListStateChanged, this, [this]() {
@@ -432,6 +428,14 @@ void MainWidget::onTimedRefreshUI()
     ui->videoWidget->updateCurrentDurationStr(str);
 }
 
+void MainWidget::setupHotkeys()
+{
+    connect(ShortcutManager::instance(),
+            &ShortcutManager::sigHotkeyTriggered,
+            this,
+            &MainWidget::onHotkeyTriggered);
+}
+
 void MainWidget::onOpenFileDlg()
 {
     QString filePath = QFileDialog::getOpenFileName(
@@ -495,4 +499,52 @@ void MainWidget::onQuitApplication()
     // 退出应用程序
     m_threadManager->stopPlay();
     QApplication::quit();
+}
+
+void MainWidget::onHotkeyTriggered(int id)
+{
+    HotkeyType type = (HotkeyType) id;
+    switch (type) {
+    case K_OpenFile:
+        onOpenFileDlg();
+        break;
+    case K_OpenFolder:
+        onOpenFolder();
+        break;
+    case K_Close:
+        onCloseToTray();
+        break;
+    case K_Options:
+        onOptions();
+        break;
+    case K_About:
+        onAbout();
+        break;
+    case K_Quit:
+        onQuitApplication();
+        break;
+    case K_PlaySelected:
+        ui->playlistWidget->playSelected();
+        break;
+    case K_PausePlay:
+        onPlayTriggered();
+        break;
+    case K_NextPlay:
+        ui->videoWidget->onNextBtnClicked();
+        break;
+    case K_PrevPlay:
+        ui->videoWidget->onPreviousBtnClicked();
+        break;
+    default:
+        break;
+    }
+}
+
+void MainWidget::onPlayTriggered()
+{
+    if (m_threadManager->isPlaying()) {
+        m_threadManager->pausePlay();
+    } else {
+        m_threadManager->resumePlay();
+    }
 }

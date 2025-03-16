@@ -34,6 +34,10 @@ public:
 
     void setVolume(int volume);
 
+public slots:
+    void onPreviousBtnClicked();
+    void onNextBtnClicked();
+
 signals:
     void sigVolumeChanged(int volume);
 
@@ -46,10 +50,6 @@ signals:
     void sigPlayListStateChanged();
 
     void sigSeekTo(int);
-
-private slots:
-    void onPreviousBtnClicked();
-    void onNextBtnClicked();
 
 private:
     void setupControls();

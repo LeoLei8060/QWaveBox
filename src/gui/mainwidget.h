@@ -55,6 +55,10 @@ private slots:
     void onAbout();
     void onQuitApplication();
 
+    void onHotkeyTriggered(int id);
+
+    void onPlayTriggered();
+
     // 托盘图标槽函数
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
@@ -71,6 +75,7 @@ private slots:
 
 private:
     // 初始化函数
+    void setupHotkeys();
     void connectTitleBarSignals();
     void setupPlayListWidget();
     void setupVideoWidget();

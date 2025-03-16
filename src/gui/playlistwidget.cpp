@@ -27,6 +27,23 @@ void PlaylistWidget::addFileToDefaultList(const QString &file)
         AppContext::instance()->getAppData()->addPlayFileToDefAlbum(file);
 }
 
+void PlaylistWidget::playSelected()
+{
+    int index = ui->tabWidget->currentIndex();
+    if (0 == index) {
+        // 默认专辑
+        if (auto path = ui->listView_def->getSelectedPath(); !path.isEmpty())
+            emit sigOpenFile(path);
+    } else if (1 == index) {
+        // 此电脑专辑
+        if (auto path = ui->listView->getSelectedPath(); !path.isEmpty())
+            emit sigOpenFile(path);
+    } else {
+        // 新增自定义专辑
+        // TODO: 待处理
+    }
+}
+
 void PlaylistWidget::setupTabWidget()
 {
     ui->tabWidget->setTabText(0, "默认专辑");
