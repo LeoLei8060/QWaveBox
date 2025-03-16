@@ -235,8 +235,8 @@ void MainWidget::setupMenu()
     optionsAction->setShortcut(QKeySequence("F5"));
     QAction *aboutAction = new QAction(tr("关于(F12)"), this);
     aboutAction->setShortcut(QKeySequence("F12"));
-    QAction *quitAction = new QAction(tr("退出(Ctrl+F4)"), this);
-    quitAction->setShortcut(QKeySequence("Ctrl+F4"));
+    QAction *quitAction = new QAction(tr("退出(Alt+F4)"), this);
+    quitAction->setShortcut(QKeySequence("Alt+F4"));
 
     // 添加菜单项到菜单
     m_menu->addAction(openFileAction);
