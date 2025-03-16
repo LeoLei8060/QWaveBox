@@ -1,9 +1,12 @@
 #include "application.h"
+#include "constants.h"
 #include "fontmanager.h"
+#include "shortcutmanager.h"
 
 #include <QDebug>
 #include <QFile>
 #include <QIcon>
+#include <QMap>
 
 Application::Application(int &argc, char **argv, const QString &appKey)
     : QApplication(argc, argv)
@@ -19,6 +22,7 @@ Application::~Application() {}
 
 bool Application::initialize()
 {
+    initializeHotkey();
     if (initializeIcon() && initializeIconFont() && initializeStyle())
         return true;
     return false;
@@ -55,4 +59,22 @@ bool Application::initializeStyle()
         return true;
     }
     return false;
+}
+
+bool Application::initializeHotkey()
+{
+    static QMap<int, QString> hotkeys = {{K_OpenFile, "F3"},
+                                         {K_OpenFolder, "F2"},
+                                         {K_Close, "F4"},
+                                         {K_Options, "F5"},
+                                         {K_About, "F1"},
+                                         {K_Quit, "Ctrl+F4"},
+                                         {K_PlaySelected, "Enter"},
+                                         {K_PausePlay, "Space"},
+                                         {K_NextPlay, "Right"},
+                                         {K_PrevPlay, "Left"}};
+    for (auto it = hotkeys.begin(); it != hotkeys.end(); ++it) {
+        ShortcutManager::instance()->registerHotkey(it.value(), it.key());
+    }
+    return true;
 }

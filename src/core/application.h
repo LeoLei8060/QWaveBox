@@ -21,6 +21,7 @@ private:
     bool initializeIcon();
     bool initializeIconFont();
     bool initializeStyle();
+    bool initializeHotkey();
 
 private:
     QString m_appKey;
