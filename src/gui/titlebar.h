@@ -58,14 +58,6 @@ private:
     bool          m_isMaximized = false;
     bool          m_isFullscreen = false;
     QFont         m_iconFont;
-
-    // 只保留快捷键，菜单将由主窗口提供
-    QShortcut *m_openFileShortcut;
-    QShortcut *m_openFolderShortcut;
-    QShortcut *m_closeToTrayShortcut;
-    QShortcut *m_optionsShortcut;
-    QShortcut *m_aboutShortcut;
-    QShortcut *m_quitShortcut;
 };
 
 #endif // TITLEBAR_H
