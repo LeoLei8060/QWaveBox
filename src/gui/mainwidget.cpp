@@ -42,6 +42,7 @@ MainWidget::MainWidget(QWidget *parent)
     ui->videoWidget->setCursor(Qt::ArrowCursor);
 
     setupHotkeys();
+    connectTitleBarSignals();
     setupPlayListWidget();
     setupVideoWidget();
     // 初始化菜单和托盘
@@ -438,6 +439,25 @@ void MainWidget::setupHotkeys()
     });
 }
 
+void MainWidget::connectTitleBarSignals()
+{
+    if (ui->titlebar) {
+        TitleBar *titleBar = qobject_cast<TitleBar *>(ui->titlebar);
+        if (titleBar) {
+            // 连接信号和槽
+            // connect(titleBar, &TitleBar::openFileRequested, this, &MainWidget::onOpenFileDlg);
+            // connect(titleBar, &TitleBar::openFolderRequested, this, &MainWidget::onOpenFolder);
+            connect(titleBar, &TitleBar::closeToTrayRequested, this, &MainWidget::onCloseToTray);
+            // connect(titleBar, &TitleBar::optionsRequested, this, &MainWidget::onOptions);
+            // connect(titleBar, &TitleBar::aboutRequested, this, &MainWidget::onAbout);
+            // connect(titleBar,
+            //         &TitleBar::quitApplicationRequested,
+            //         this,
+            //         &MainWidget::onQuitApplication);
+        }
+    }
+}
+
 void MainWidget::onOpenFileDlg()
 {
     QString filePath = QFileDialog::getOpenFileName(
@@ -468,6 +488,10 @@ void MainWidget::onOpenFolder()
 
 void MainWidget::onCloseToTray()
 {
+    // 如果正在播放，需要暂停
+    if (m_threadManager->isPlaying())
+        onPlayTriggered();
+
     hide();
 
     // 如果托盘图标存在，显示通知

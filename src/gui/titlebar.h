@@ -27,12 +27,7 @@ public slots:
     void onFullscreenButtonClicked();
 
 signals:
-    void openFileRequested();
-    void openFolderRequested();
     void closeToTrayRequested();
-    void optionsRequested();
-    void aboutRequested();
-    void quitApplicationRequested();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

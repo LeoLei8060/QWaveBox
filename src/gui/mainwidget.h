@@ -76,6 +76,7 @@ private slots:
 private:
     // 初始化函数
     void setupHotkeys();
+    void connectTitleBarSignals();
     void setupPlayListWidget();
     void setupVideoWidget();
     void setupMenu();
