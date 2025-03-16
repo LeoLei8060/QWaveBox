@@ -160,7 +160,7 @@ set(RESOURCES
 )
 
 # 添加可执行文件
-add_executable(${PROJECT_NAME}
+add_executable(${PROJECT_NAME} WIN32
     ${SOURCES}
     ${HEADERS}
     ${UI_FILES}
