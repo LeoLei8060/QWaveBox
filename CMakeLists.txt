@@ -87,11 +87,15 @@ set(UTILS_HEADERS
 set(CORE_SOURCES
     src/core/appcontext.cpp
     src/core/application.cpp
+    src/core/appdata.cpp
+    src/core/shortcutmanager.cpp
 )
 set(CORE_HEADERS
     src/core/appcontext.h
     src/core/constants.h
     src/core/application.h
+    src/core/appdata.h
+    src/core/shortcutmanager.h
 )
 
 set(PLAY_SOURCES
@@ -157,6 +161,7 @@ set(UI_FILES
 # 资源文件
 set(RESOURCES
     src/resources.qrc
+    src/QWaveBox.rc
 )
 
 # 添加可执行文件
@@ -165,8 +170,6 @@ add_executable(${PROJECT_NAME} WIN32
     ${HEADERS}
     ${UI_FILES}
     ${RESOURCES}
-    src/core/appdata.h src/core/appdata.cpp
-    src/core/shortcutmanager.h src/core/shortcutmanager.cpp
 )
 
 # 包含目录
