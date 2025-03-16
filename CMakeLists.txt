@@ -166,6 +166,7 @@ add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${RESOURCES}
     src/core/appdata.h src/core/appdata.cpp
+    src/core/shortcutmanager.h src/core/shortcutmanager.cpp
 )
 
 # 包含目录
